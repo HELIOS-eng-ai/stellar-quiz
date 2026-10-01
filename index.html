@@ -1,0 +1,1785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Stellar's Quiz Time ✿</title>
+<style>
+  :root{
+    --cream:#FFF9F2; --white:#FFFDFC; --pink:#F7D6E0; --pink-deep:#EC72B1; --pink-dark:#C94F8C;
+    --mint:#CDEEDD; --mint-deep:#91D8BC; --plum:#302A45; --ink:#36323A; --muted:#857987;
+    --gold:#F3C969; --wrong:#F9D7DC; --border:#F0E0E8; --lilac:#EEE8F8;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  body{background:var(--cream);color:var(--ink);display:flex;justify-content:center;min-height:100vh;}
+  .app-shell{width:100%;max-width:480px;background:var(--cream);min-height:100vh;display:flex;flex-direction:column;position:relative;padding-bottom:84px;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .screen{display:none;padding:16px;flex-direction:column;}
+  .screen.active{display:flex;}
+  .kicker{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--pink-dark);text-transform:uppercase;}
+  .hero-title{font-size:27px;font-weight:900;color:var(--plum);margin-top:4px;}
+  .hero-header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 16px;position:relative;}
+  .sparkle-badge{width:46px;height:46px;border-radius:16px;background:#F8D955;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;animation:wobble 2.6s ease-in-out infinite;border:none;padding:0;cursor:pointer;-webkit-user-select:none;user-select:none;touch-action:manipulation;}
+  .stats-row{display:flex;gap:8px;margin-bottom:2px;}
+  .stat-card{flex:1;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:12px;box-shadow:0 4px 8px rgba(48,42,69,.04);}
+  .stat-icon{width:30px;height:30px;border-radius:10px;background:#F6E8A5;display:flex;align-items:center;justify-content:center;margin-bottom:6px;font-size:14px;animation:bob 3s ease-in-out infinite;}
+  .stat-card:nth-child(1) .stat-icon{animation-delay:0s;}
+  .stat-card:nth-child(2) .stat-icon{animation-delay:.3s;background:var(--mint);}
+  .stat-card:nth-child(3) .stat-icon{animation-delay:.6s;background:var(--pink);}
+  .stat-value{font-size:18px;font-weight:900;color:var(--plum);}
+  .stat-label{font-size:11px;color:var(--muted);font-weight:700;}
+  .card{background:var(--white);border-radius:20px;padding:18px;border:1px solid var(--border);box-shadow:0 4px 10px rgba(48,42,69,.05);margin-top:14px;}
+  .feature-card{background:var(--plum);color:#fff;border-radius:22px;padding:20px;position:relative;overflow:hidden;}
+  .feature-kicker{color:var(--mint-deep);font-size:11px;font-weight:800;letter-spacing:1px;}
+  .feature-title{font-size:21px;font-weight:900;margin-top:6px;color:#fff;}
+  .feature-sub{color:#E7DCE7;font-size:13px;margin-top:4px;}
+  .card-title{font-size:17px;font-weight:900;color:var(--plum);margin-bottom:8px;}
+  .divider{height:8px;border-radius:6px;margin:18px 0;background:var(--pink);opacity:.6;}
+  .btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 16px;border-radius:14px;font-weight:800;font-size:14px;cursor:pointer;border:none;transition:all .15s ease;text-align:center;text-decoration:none;user-select:none;width:100%;}
+  .btn:active{transform:scale(.98);opacity:.9;}
+  .btn:disabled{opacity:.4;cursor:not-allowed;}
+  .btn-primary{background:var(--pink-deep);color:#fff;}
+  .btn-mint{background:var(--mint-deep);color:var(--plum);}
+  .btn-ghost{background:transparent;border:1.5px solid var(--pink-deep);color:var(--pink-dark);}
+  .btn-row{display:flex;gap:8px;margin-top:10px;}
+  .btn-row .btn{margin-top:0;}
+  .wobble{animation:wobble-soft 3.4s ease-in-out infinite;}
+  input[type="text"], textarea, select{width:100%;background:#FFFCF8;border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:14px;color:var(--ink);outline:none;margin-top:8px;margin-bottom:4px;}
+  input[type="range"]{width:100%;margin-top:10px;accent-color:var(--pink-deep);}
+  textarea{resize:vertical;min-height:100px;font-family:inherit;}
+  input:focus, textarea:focus, select:focus{border-color:var(--pink-deep);}
+  .pill{display:inline-block;background:var(--mint);color:var(--plum);border-radius:999px;padding:4px 9px;font-size:11px;font-weight:800;margin-right:6px;margin-bottom:6px;}
+  .set-row{display:flex;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:12px;margin-top:10px;cursor:pointer;}
+  .set-row:active{background:#FFF7FB;}
+  .set-icon{width:38px;height:38px;border-radius:12px;background:var(--mint);display:flex;align-items:center;justify-content:center;margin-right:12px;font-size:16px;font-weight:bold;color:var(--plum);flex-shrink:0;}
+  .set-name{font-size:15px;font-weight:900;color:var(--plum);}
+  .set-meta{font-size:12px;color:var(--muted);margin-top:2px;}
+  .chevron{font-size:24px;color:var(--muted);margin-left:8px;padding-left:2px;}
+  .empty-text{text-align:center;color:var(--muted);padding:12px;font-size:13px;}
+  .progress-track{height:8px;background:#EBDCE6;border-radius:6px;overflow:hidden;margin:8px 0 14px;}
+  .progress-fill{height:100%;background:var(--pink-deep);width:0%;transition:width .2s ease;}
+  .qnav-strip{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;-webkit-overflow-scrolling:touch;}
+  .qnav-btn{width:32px;height:32px;min-width:32px;border-radius:50%;border:1.5px solid var(--border);background:#fff;font-weight:800;font-size:12px;color:var(--muted);flex-shrink:0;cursor:pointer;}
+  .qnav-btn.current{border-color:var(--pink-deep);color:var(--pink-dark);background:var(--pink);}
+  .qnav-btn.answered{background:var(--mint);border-color:var(--mint-deep);color:var(--plum);}
+  .option-btn{width:100%;display:flex;align-items:center;padding:12px 14px;border:1.5px solid var(--border);border-radius:14px;background:#FFFCF8;margin-top:10px;cursor:pointer;font-weight:700;font-size:14px;color:var(--ink);text-align:left;}
+  .option-btn .opt-letter{width:28px;height:28px;border-radius:8px;background:var(--lilac);display:flex;align-items:center;justify-content:center;margin-right:10px;font-size:12px;flex-shrink:0;}
+  .option-btn .opt-check{margin-left:auto;font-weight:900;}
+  .option-btn.correct{background:var(--mint);border-color:var(--mint-deep);}
+  .option-btn.wrong{background:var(--wrong);border-color:#E59BA5;}
+  .info-box{background:#FFF6E5;border:1.5px dashed var(--gold);border-radius:14px;padding:12px;margin-top:12px;font-size:13px;line-height:1.4;}
+  .result-box{border-radius:14px;padding:13px;margin-top:12px;font-weight:800;font-size:13px;}
+  .result-box.correct{background:var(--mint);}
+  .result-box.wrong{background:var(--wrong);}
+  .assessment-box{background:var(--mint);border-radius:14px;padding:14px;margin-top:14px;}
+  .assessment-title{font-weight:900;color:var(--plum);font-size:13px;}
+  .assessment-score{font-size:28px;font-weight:900;color:var(--plum);margin:4px 0 6px;}
+  .assessment-help{font-size:12px;color:var(--plum);opacity:.75;line-height:1.4;}
+  .box-title{font-weight:900;color:var(--plum);margin-bottom:5px;font-size:13px;}
+  .q-meta{display:flex;flex-wrap:wrap;gap:0;}
+  .q-text{font-size:19px;font-weight:900;color:var(--plum);margin:10px 0 4px;line-height:1.35;}
+  .label{font-size:11px;font-weight:900;color:var(--plum);text-transform:uppercase;letter-spacing:.4px;margin-top:14px;display:block;}
+  .type-choices{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+  .type-choice{padding:9px 12px;border-radius:12px;border:1px solid var(--border);background:var(--white);font-size:13px;font-weight:700;cursor:pointer;color:var(--ink);}
+  .type-choice.active{background:var(--pink);border-color:var(--pink-deep);}
+  .preview-item{display:flex;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:12px;margin-top:10px;cursor:pointer;}
+  .preview-num{width:30px;height:30px;border-radius:10px;background:var(--lilac);display:flex;align-items:center;justify-content:center;margin-right:10px;font-weight:900;font-size:13px;color:var(--plum);flex-shrink:0;}
+  .preview-q{font-size:13.5px;font-weight:800;color:var(--ink);line-height:1.35;}
+  .modal{display:none;position:fixed;inset:0;background:rgba(48,42,69,.4);z-index:200;align-items:flex-end;justify-content:center;}
+  .modal.active{display:flex;}
+  .modal-sheet{background:var(--cream);width:100%;max-width:480px;max-height:88vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:18px;box-shadow:0 -10px 25px rgba(0,0,0,.15);}
+  .bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:68px;background:var(--white);border-top:1px solid var(--border);display:flex;justify-content:space-around;align-items:center;z-index:100;}
+  .nav-item{display:flex;flex-direction:column;align-items:center;background:none;border:none;cursor:pointer;color:var(--muted);font-size:11px;font-weight:800;gap:3px;}
+  .nav-item span{font-size:18px;}
+  .nav-item.active{color:var(--pink-deep);}
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
+  .icon-btn{padding:6px 12px;border-radius:12px;border:1.5px solid var(--pink-deep);color:var(--pink-dark);background:transparent;font-weight:800;cursor:pointer;font-size:13px;flex-shrink:0;}
+  .tiny{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.4;}
+  .help{color:var(--muted);font-size:13px;line-height:1.45;}
+  .results-big{font-size:52px;font-weight:900;color:var(--pink-deep);text-align:center;}
+  .results-label{text-align:center;font-weight:800;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.5px;}
+  .toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--plum);color:#fff;padding:11px 18px;border-radius:14px;font-size:13px;font-weight:700;z-index:300;opacity:0;pointer-events:none;transition:opacity .2s ease;max-width:85%;text-align:center;}
+  .toast.show{opacity:1;}
+  .chart-row{display:flex;align-items:center;gap:10px;margin-top:12px;}
+  .chart-label{width:104px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--plum);line-height:1.25;}
+  .chart-track{flex:1;height:16px;background:#F1E4EC;border-radius:8px;overflow:hidden;}
+  .chart-fill{height:100%;border-radius:8px;background:var(--pink-deep);}
+  .chart-pct{width:38px;flex-shrink:0;text-align:right;font-size:12px;font-weight:900;color:var(--muted);}
+  .type-check-row{display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--border);font-size:13.5px;font-weight:700;color:var(--ink);}
+  .type-check-row:last-child{border-bottom:none;}
+  .type-check-row input{width:18px;height:18px;accent-color:var(--pink-deep);margin:0;flex-shrink:0;}
+  .deco{display:inline-block;pointer-events:none;user-select:none;animation:floaty 3.2s ease-in-out infinite;}
+  .deco.abs{position:absolute;}
+  @keyframes wobble{0%,100%{transform:rotate(-6deg);}50%{transform:rotate(6deg);}}
+  @keyframes wobble-soft{0%,100%{transform:rotate(-1.4deg);}50%{transform:rotate(1.4deg);}}
+  @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  #screen-quiz .card{margin-top:14px;}
+  #flash-card{transition:box-shadow .15s ease;}
+  #flash-card:active{box-shadow:0 2px 6px rgba(48,42,69,.08);}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- HOME -->
+  <section id="screen-home" class="screen active">
+    <div class="hero-header">
+      <div><div class="kicker">LET'S ACE THE EXAM ✦</div><h1 class="hero-title">Stellar's quiz time</h1></div>
+      <button id="music-toggle" class="sparkle-badge" title="Cozy background sounds — long-press to customize" oncontextmenu="return false;">🎵</button>
+      <span class="deco abs" style="top:-8px;right:64px;font-size:15px;animation-delay:.5s;">🌸</span>
+    </div>
+
+    <svg viewBox="0 0 400 34" width="100%" height="30" preserveAspectRatio="none" style="display:block;margin-bottom:4px;">
+      <path d="M0,28 Q10,16 20,28 T40,28 T60,28 T80,28 T100,28 T120,28 T140,28 T160,28 T180,28 T200,28 T220,28 T240,28 T260,28 T280,28 T300,28 T320,28 T340,28 T360,28 T380,28 T400,28 L400,34 L0,34 Z" fill="#91D8BC" opacity="0.5"/>
+      <circle cx="40" cy="15" r="4" fill="#EC72B1"/><circle cx="46" cy="13" r="3.5" fill="#F7D6E0"/>
+      <circle cx="150" cy="13" r="4" fill="#F3C969"/><circle cx="156" cy="15" r="3.5" fill="#EC72B1"/>
+      <circle cx="270" cy="14" r="4" fill="#F7D6E0"/><circle cx="276" cy="12" r="3.5" fill="#EC72B1"/>
+      <circle cx="355" cy="15" r="4" fill="#F3C969"/>
+    </svg>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon">♨</div><div class="stat-value" id="home-streak">0 day</div><div class="stat-label">streak</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--mint);">✓</div><div class="stat-value" id="home-mastery">0%</div><div class="stat-label">mastery</div></div>
+      <div class="stat-card"><div class="stat-icon" style="background:var(--pink);">▣</div><div class="stat-value" id="home-total-q">0</div><div class="stat-label">questions</div></div>
+    </div>
+
+    <div class="card feature-card">
+      <span class="deco abs" style="top:10px;left:14px;font-size:15px;opacity:.85;animation-delay:.2s;">🌿</span>
+      <span class="deco abs" style="bottom:10px;right:14px;font-size:22px;animation-delay:.9s;">🧁</span>
+      <div class="feature-kicker">READY WHEN YOU ARE</div>
+      <div class="feature-title" id="feature-title">Import your first study set</div>
+      <div class="feature-sub" id="feature-sub">Turn your notes into an interactive practice quiz.</div>
+      <button class="btn btn-primary wobble" id="feature-btn" style="margin-top:16px;">Import study material →</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="kicker" style="color:var(--plum);margin-bottom:6px;">YOUR QUESTION SETS <span class="deco" style="font-size:13px;animation-delay:1.1s;">🌼</span></div>
+    <div id="home-set-list"></div>
+    <button class="btn btn-ghost" style="margin-top:14px;" onclick="startQuizImportFresh()">＋ Import more study material</button>
+  </section>
+
+  <!-- QUIZ IMPORT -->
+  <section id="screen-import" class="screen">
+    <div class="top-row"><h2 class="hero-title" style="font-size:21px;">Import material</h2><button class="icon-btn" onclick="navTo(pendingAppendTarget?'bank':'home')">✕</button></div>
+
+    <div class="card">
+      <div class="card-title">1. Choose question types</div>
+      <p class="help">Only checked types will show up in your copied prompt.</p>
+      <div id="type-checkboxes" style="margin-top:6px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">2. Give an AI your raw notes</div>
+      <p class="help">Copy the conversion prompt, paste it into ChatGPT / Claude / Gemini, then paste your raw questions underneath it in that chat. The prompt asks the AI to keep its answer under 20,000 characters so it pastes cleanly back into Android.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="copy-prompt-btn">Copy prompt</button>
+        <button class="btn btn-mint" id="share-prompt-btn">Share</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:8px;" id="raw-prompt-toggle">Show prompt text (manual copy)</button>
+      <textarea id="raw-prompt-box" readonly style="display:none;min-height:160px;font-size:12px;"></textarea>
+      <p class="tiny">This app never sends your notes anywhere by itself — you paste them into whichever AI chat you choose.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-title" id="import-json-title">3. Paste the JSON result</div>
+      <input type="text" id="import-set-name" placeholder="Set name (e.g. Microbial Genetics Ch. 4)" />
+      <textarea id="import-json-input" placeholder='[ { "id": "q1", "type": "mcq", ... } ]' style="min-height:140px;"></textarea>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="processImport()">Preview & edit →</button>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- QUIZ PREVIEW -->
+  <section id="screen-preview" class="screen">
+    <div class="top-row"><h2 class="hero-title" style="font-size:21px;">Preview & edit</h2><button class="icon-btn" onclick="navTo('import')">✕</button></div>
+    <div class="card"><div class="card-title" id="preview-count">0 questions ready ✿</div><p class="help">AI parsing is only a first pass — tap a question to inspect or change it before saving.</p></div>
+    <div id="preview-list"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="savePreviewToBank()">Save to question bank ✿</button>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- QUIZ -->
+  <section id="screen-quiz" class="screen">
+    <div class="top-row">
+      <button class="icon-btn" onclick="exitQuiz()">✕ Exit</button>
+      <span class="kicker" id="quiz-counter">QUESTION 1 OF 1</span>
+      <span class="pill" id="quiz-type-pill">MCQ</span>
+    </div>
+    <div class="qnav-strip" id="quiz-nav-strip"></div>
+    <div class="progress-track"><div class="progress-fill" id="quiz-progress-bar"></div></div>
+    <div class="card">
+      <div class="q-meta" id="quiz-meta-pills"></div>
+      <h3 class="q-text" id="quiz-question-text">Question text</h3>
+
+      <div id="quiz-mcq-wrap"></div>
+
+      <div id="quiz-fill-wrap" style="display:none;">
+        <input type="text" id="quiz-fill-input" placeholder="Type your answer..." autocomplete="off" />
+        <button class="btn btn-primary" style="margin-top:8px;" id="quiz-fill-check-btn" onclick="checkFillAnswer()">Check answer</button>
+        <div id="quiz-fill-result"></div>
+      </div>
+
+      <div id="quiz-match-wrap" style="display:none;">
+        <div id="quiz-match-rows"></div>
+        <button class="btn btn-primary" style="margin-top:10px;" id="quiz-match-check-btn" onclick="checkMatchAnswers()">Check matches</button>
+        <div id="quiz-match-result"></div>
+      </div>
+
+      <div id="quiz-subj-wrap" style="display:none;">
+        <textarea id="quiz-subj-input" placeholder="Write what you know…" style="min-height:150px;"></textarea>
+        <button class="btn btn-primary" style="margin-top:4px;" id="quiz-subj-submit-btn" onclick="submitSubjectiveAnswer()">Submit answer</button>
+        <div id="quiz-subj-result"></div>
+        <div id="quiz-subj-actions" style="display:none;">
+          <div class="btn-row">
+            <button class="btn btn-mint" onclick="toggleModelAnswer()" id="quiz-model-toggle-btn">Show model answer</button>
+            <button class="btn btn-ghost" onclick="openGradingModal()">AI grading prompt</button>
+          </div>
+        </div>
+        <div id="quiz-model-box" class="info-box" style="display:none;"></div>
+      </div>
+
+      <button id="quiz-hint-toggle-btn" class="btn btn-ghost" style="margin-top:14px;" onclick="toggleHint()">Show hint</button>
+      <div id="quiz-hint-box" class="info-box" style="display:none;"></div>
+
+      <div class="btn-row" style="margin-top:14px;">
+        <button class="btn btn-ghost" id="quiz-prev-btn" onclick="prevQuestion()">‹ Prev</button>
+        <button id="quiz-next-btn" class="btn btn-primary" style="display:none;" onclick="nextQuestion()">Next question →</button>
+      </div>
+      <button id="quiz-finish-btn" class="btn btn-mint" style="margin-top:8px;display:none;" onclick="finishQuiz()">End & see results ✦</button>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="screen-results" class="screen">
+    <div class="hero-header"><div><div class="kicker">ASSESSMENT COMPLETE ✦</div><h1 class="hero-title">Nice work, Stellar.</h1></div></div>
+    <div class="card" style="text-align:center;">
+      <div class="results-big" id="results-score">100%</div>
+      <div class="results-label">overall practice success</div>
+      <div id="results-subj-summary" class="help" style="margin-top:8px;"></div>
+      <div class="divider"></div>
+      <div class="card-title" id="results-set-name" style="margin-bottom:2px;"></div>
+      <p class="help" id="results-attempt-count" style="margin-bottom:14px;"></p>
+      <button class="btn btn-primary" onclick="exportAssessmentTxt()">Download assessment (.txt)</button>
+      <div style="height:8px"></div>
+      <button class="btn btn-ghost" onclick="copyAssessmentTxt()">Copy assessment text</button>
+      <div style="height:8px"></div>
+      <button class="btn btn-mint" id="results-retry-btn">Practice set again</button>
+      <div style="height:8px"></div>
+      <button class="btn btn-ghost" onclick="navTo('home')">Back to dashboard</button>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- STUDY HUB -->
+  <section id="screen-study" class="screen">
+    <div class="hero-header"><div><div class="kicker">HIGH-YIELD FIRST ✦</div><h1 class="hero-title" style="font-size:23px;">Study</h1></div></div>
+    <div class="card feature-card">
+      <span class="deco abs" style="top:10px;left:14px;font-size:15px;opacity:.85;">🌿</span>
+      <span class="deco abs" style="bottom:10px;right:14px;font-size:20px;">🌸</span>
+      <div class="feature-kicker">FLASHCARDS · 80/20 RULE</div>
+      <div class="feature-title">Learn the vital few first</div>
+      <div class="feature-sub">Import notes and get high-yield flashcards before anything else.</div>
+      <button class="btn btn-mint" style="margin-top:16px;" onclick="startStudyImport()">＋ Import study material</button>
+    </div>
+    <div class="divider"></div>
+    <div class="kicker" style="color:var(--plum);margin-bottom:6px;">YOUR DECKS</div>
+    <div id="study-deck-list"></div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- STUDY IMPORT -->
+  <section id="screen-study-import" class="screen">
+    <div class="top-row"><h2 class="hero-title" style="font-size:21px;">Import for study</h2><button class="icon-btn" onclick="navTo(pendingAppendDeckTarget?'bank':'study')">✕</button></div>
+    <div class="card">
+      <div class="card-title">1. Give an AI your raw notes</div>
+      <p class="help">This prompt asks the AI to apply the 80/20 rule — flagging the high-yield concepts worth mastering first — and turn everything into flashcards. It also keeps output under 20,000 characters for Android pasting.</p>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="copy-study-prompt-btn">Copy prompt</button>
+        <button class="btn btn-mint" id="share-study-prompt-btn">Share</button>
+      </div>
+      <button class="btn btn-ghost" style="margin-top:8px;" id="raw-study-prompt-toggle">Show prompt text (manual copy)</button>
+      <textarea id="raw-study-prompt-box" readonly style="display:none;min-height:160px;font-size:12px;"></textarea>
+    </div>
+    <div class="card">
+      <div class="card-title" id="study-import-json-title">2. Paste the JSON result</div>
+      <input type="text" id="study-set-name" placeholder="Deck name (e.g. Cell Biology Basics)" />
+      <textarea id="study-json-input" placeholder='[ { "id": "c1", "front": "...", "back": "...", "priority": "high" } ]' style="min-height:140px;"></textarea>
+      <button class="btn btn-primary" style="margin-top:10px;" onclick="processStudyImport()">Preview & save →</button>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- STUDY PREVIEW -->
+  <section id="screen-study-preview" class="screen">
+    <div class="top-row"><h2 class="hero-title" style="font-size:21px;">Preview cards</h2><button class="icon-btn" onclick="navTo('study-import')">✕</button></div>
+    <div class="card"><div class="card-title" id="study-preview-count">0 cards ready ✿</div><p class="help">Tap a card to edit it before saving.</p></div>
+    <div id="study-preview-list"></div>
+    <button class="btn btn-primary" style="margin-top:16px;" onclick="saveStudyPreviewToDeck()">Save to deck ✿</button>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- FLASHCARDS -->
+  <section id="screen-flashcards" class="screen">
+    <div class="top-row">
+      <button class="icon-btn" onclick="exitFlashcards()">✕ Exit</button>
+      <span class="kicker" id="flash-counter">CARD 1 OF 1</span>
+    </div>
+    <label style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--plum);margin:10px 0 4px;">
+      <input type="checkbox" id="flash-highyield-toggle" checked />High-yield only (80/20)
+    </label>
+    <div class="progress-track"><div class="progress-fill" id="flash-progress-bar"></div></div>
+    <div class="card" id="flash-card" style="min-height:220px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;cursor:pointer;">
+      <div class="pill" id="flash-topic-pill" style="align-self:flex-start;"></div>
+      <div id="flash-face-label" class="kicker" style="margin-top:8px;">FRONT · TAP TO FLIP</div>
+      <div id="flash-face-text" class="q-text" style="margin-top:10px;"></div>
+    </div>
+    <div class="btn-row" id="flash-rate-row" style="display:none;">
+      <button class="btn btn-ghost" onclick="rateCard(false)">Still learning ↺</button>
+      <button class="btn btn-mint" onclick="rateCard(true)">Got it ✓</button>
+    </div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn btn-ghost" id="flash-prev-btn" onclick="prevFlashcard()">‹ Prev</button>
+      <button class="btn btn-primary" onclick="nextFlashcard()">Skip →</button>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- BANK -->
+  <section id="screen-bank" class="screen">
+    <div class="hero-header"><h2 class="hero-title" style="font-size:21px;">Question bank</h2></div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="bank-tab-quiz" style="flex:1;">Quiz sets</button>
+      <button class="btn btn-ghost" id="bank-tab-study" style="flex:1;">Study decks</button>
+    </div>
+    <div id="bank-quiz-panel"></div>
+    <div id="bank-study-panel" style="display:none;"></div>
+    <div class="divider"></div>
+    <button class="btn btn-ghost" style="color:#c94f4f;border-color:#c94f4f;" onclick="clearAllData()">Clear all stored data</button>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- STATS -->
+  <section id="screen-stats" class="screen">
+    <div class="hero-header"><div><div class="kicker">YOUR PROGRESS ✦</div><h1 class="hero-title" style="font-size:23px;">Analysis</h1></div></div>
+    <div class="card">
+      <div class="card-title">Syllabus covered</div>
+      <p class="help">Percentage covered per set — tap a set to see its topic breakdown.</p>
+      <div id="syllabus-chart"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Time studied</div>
+      <p class="help">Minutes spent in quiz + flashcard sessions, last 7 days.</p>
+      <div id="time-chart"></div>
+    </div>
+    <div style="height:20px"></div>
+  </section>
+
+  <!-- EDIT QUESTION MODAL -->
+  <div id="edit-modal" class="modal">
+    <div class="modal-sheet">
+      <div class="top-row"><h3 class="hero-title" style="font-size:18px;" id="edit-modal-title">Edit question</h3><button class="icon-btn" onclick="closeEditModal()">✕</button></div>
+      <label class="label">Question</label>
+      <textarea id="edit-question-text" style="min-height:90px;"></textarea>
+      <label class="label">Type</label>
+      <div class="type-choices" id="edit-type-choices"></div>
+      <label class="label">Marks</label>
+      <div class="type-choices" id="edit-marks-choices"></div>
+
+      <div id="edit-options-wrap" style="display:none;">
+        <label class="label">Options</label>
+        <input type="text" id="edit-opt-0" placeholder="Option A" />
+        <input type="text" id="edit-opt-1" placeholder="Option B" />
+        <input type="text" id="edit-opt-2" placeholder="Option C" />
+        <input type="text" id="edit-opt-3" placeholder="Option D" />
+      </div>
+
+      <div id="edit-tf-wrap" style="display:none;">
+        <label class="label">Correct answer</label>
+        <div class="type-choices" id="edit-tf-choices"></div>
+      </div>
+
+      <div id="edit-pairs-wrap" style="display:none;">
+        <label class="label">Match pairs (left → right)</label>
+        <div id="edit-pairs-rows"></div>
+      </div>
+
+      <div id="edit-correct-answer-wrap" style="display:none;">
+        <label class="label">Correct answer / accepted answer</label>
+        <input type="text" id="edit-correct-answer" placeholder="Correct answer" />
+      </div>
+
+      <label class="label">Model answer</label>
+      <textarea id="edit-model-answer" style="min-height:80px;"></textarea>
+      <label class="label">Hint</label>
+      <input type="text" id="edit-hint" placeholder="Hint" />
+      <label class="label">Topic</label>
+      <input type="text" id="edit-topic" placeholder="Topic tag" />
+      <button class="btn btn-primary" style="margin-top:18px;" onclick="closeEditModal()">Done editing</button>
+    </div>
+  </div>
+
+  <!-- STUDY CARD EDIT MODAL -->
+  <div id="study-edit-modal" class="modal">
+    <div class="modal-sheet">
+      <div class="top-row"><h3 class="hero-title" style="font-size:18px;" id="study-edit-title">Edit card</h3><button class="icon-btn" onclick="closeStudyEditModal()">✕</button></div>
+      <label class="label">Front</label>
+      <textarea id="study-edit-front" style="min-height:70px;"></textarea>
+      <label class="label">Back</label>
+      <textarea id="study-edit-back" style="min-height:90px;"></textarea>
+      <label class="label">Priority</label>
+      <div class="type-choices" id="study-edit-priority"></div>
+      <label class="label">Topic</label>
+      <input type="text" id="study-edit-topic" placeholder="Topic tag" />
+      <button class="btn btn-primary" style="margin-top:18px;" onclick="closeStudyEditModal()">Done editing</button>
+    </div>
+  </div>
+
+  <!-- AI GRADING MODAL -->
+  <div id="grading-modal" class="modal">
+    <div class="modal-sheet">
+      <div class="top-row"><h3 class="hero-title" style="font-size:18px;">AI grading</h3><button class="icon-btn" onclick="closeGradingModal()">✕</button></div>
+      <p class="help">Copy this prompt into your preferred AI, or share it directly. Then paste the feedback below so it saves with this attempt.</p>
+      <textarea id="modal-grading-prompt" style="min-height:180px;font-size:12px;" readonly></textarea>
+      <div class="btn-row">
+        <button class="btn btn-ghost" id="modal-copy-btn">Copy</button>
+        <button class="btn btn-mint" id="modal-share-btn">Share to AI</button>
+      </div>
+      <label class="label">Paste AI feedback here</label>
+      <textarea id="modal-feedback-input" placeholder="What you got right… what you missed… estimated marks…" style="min-height:100px;"></textarea>
+      <button class="btn btn-primary" style="margin-top:8px;" onclick="saveAIFeedback()">Save assessment</button>
+    </div>
+  </div>
+
+  <!-- MUSIC SETTINGS MODAL -->
+  <div id="music-modal" class="modal">
+    <div class="modal-sheet">
+      <div class="top-row"><h3 class="hero-title" style="font-size:18px;">Cozy sounds</h3><button class="icon-btn" onclick="closeMusicModal()">✕</button></div>
+      <p class="help">Fully generated in your browser — no files, no internet needed.</p>
+      <label class="label">Mood</label>
+      <div class="type-choices" id="music-preset-choices"></div>
+      <label class="label">Volume</label>
+      <input type="range" id="music-volume" min="0" max="100" value="45" />
+      <label class="label">Pace</label>
+      <input type="range" id="music-tempo" min="2500" max="7000" step="250" value="4300" />
+      <p class="tiny">Slower ← → Faster</p>
+      <button class="btn btn-primary" style="margin-top:14px;" onclick="closeMusicModal()">Done</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <button class="nav-item active" id="nav-btn-home" onclick="navTo('home')"><span>⌂</span>Home</button>
+    <button class="nav-item" id="nav-btn-study" onclick="navTo('study')"><span>◈</span>Study</button>
+    <button class="nav-item" id="nav-btn-bank" onclick="navTo('bank')"><span>▥</span>Bank</button>
+    <button class="nav-item" id="nav-btn-stats" onclick="navTo('stats')"><span>◔</span>Stats</button>
+  </nav>
+</div>
+
+<script>
+/* ---------- storage ---------- */
+const STORAGE_KEY = 'stellars_quiz_time_web_v2';
+const initialState = {
+  sets:{}, decks:{}, attempts:[], activity:[], studyMinutes:{}, cardProgress:{},
+  musicSettings: { preset:'calm', volume:45, tempoMs:4300 },
+};
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return { ...JSON.parse(JSON.stringify(initialState)), ...JSON.parse(raw) };
+  }catch(e){ console.error(e); }
+  return JSON.parse(JSON.stringify(initialState));
+}
+function saveState(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  catch(e){ console.error('Storage save failed', e); }
+}
+function markActivity(){
+  const stamp = new Date().toISOString();
+  state.activity = [...(state.activity||[]), stamp].slice(-365);
+  saveState();
+}
+
+/* ---------- study time tracking (shared by quiz + flashcards) ---------- */
+let quizStartTime = null;
+function flushStudyTime(){
+  if(!quizStartTime) return;
+  const now = Date.now();
+  const elapsedMin = (now - quizStartTime) / 60000;
+  if(elapsedMin > 0){
+    const day = new Date().toISOString().slice(0,10);
+    state.studyMinutes[day] = Math.round(((state.studyMinutes[day]||0) + elapsedMin) * 10) / 10;
+    saveState();
+  }
+  quizStartTime = now;
+}
+setInterval(flushStudyTime, 20000);
+window.addEventListener('beforeunload', flushStudyTime);
+document.addEventListener('visibilitychange', () => { if(document.hidden) flushStudyTime(); });
+
+/* ---------- question types & conversion prompt (quiz) ---------- */
+const TYPE_DEFS = [
+  { key:'mcq', label:'MCQ (4 options)' },
+  { key:'fill_blank', label:'Fill in the blank' },
+  { key:'true_false', label:'True / False' },
+  { key:'match_following', label:'Match the following' },
+  { key:'subjective', label:'Subjective (2 / 5 / 10 marks)' },
+];
+const TYPE_SCHEMAS = {
+  mcq: '{"id":"q1","type":"mcq","question_text":"...","marks":null,"options":["...","...","...","..."],"correct_answer":"exact text of the correct option","model_answer":"","hint":"...","topic_tag":"..."}',
+  fill_blank: '{"id":"q2","type":"fill_blank","question_text":"...","marks":null,"correct_answer":"accepted answer (string, or array of accepted variants)","model_answer":"","hint":"...","topic_tag":"..."}',
+  true_false: '{"id":"q3","type":"true_false","question_text":"...","marks":null,"correct_answer":"true","model_answer":"","hint":"...","topic_tag":"..."}',
+  match_following: '{"id":"q4","type":"match_following","question_text":"Match each item on the left with its pair on the right.","marks":null,"pairs":[{"left":"...","right":"..."},{"left":"...","right":"..."}],"model_answer":"","hint":"...","topic_tag":"..."}',
+  subjective: '{"id":"q5","type":"subjective","question_text":"...","marks":5,"model_answer":"full ideal answer","hint":"...","topic_tag":"..."}',
+};
+function typeLabel(t){
+  const map = { mcq:'MCQ', fill_blank:'Fill blank', true_false:'True/False', match_following:'Match following', subjective:'Subjective' };
+  return map[t] || t;
+}
+let selectedTypes = new Set(TYPE_DEFS.map(t => t.key));
+function renderTypeCheckboxes(){
+  const wrap = document.getElementById('type-checkboxes');
+  wrap.innerHTML = TYPE_DEFS.map(t => `
+    <label class="type-check-row">
+      <input type="checkbox" data-type="${t.key}" ${selectedTypes.has(t.key) ? 'checked' : ''} />
+      ${t.label}
+    </label>`).join('');
+  wrap.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const key = cb.dataset.type;
+      if(cb.checked){ selectedTypes.add(key); return; }
+      if(selectedTypes.size === 1){ cb.checked = true; toast('Keep at least one question type selected.'); return; }
+      selectedTypes.delete(key);
+    });
+  });
+}
+function buildConversionPrompt(){
+  const chosen = TYPE_DEFS.filter(t => selectedTypes.has(t.key));
+  const schemaBlock = chosen.map(t => `${t.label}:\n${TYPE_SCHEMAS[t.key]}`).join('\n\n');
+  return `You are converting raw test material into a strict JSON array for Stellar's Quiz Time, a personal study app. Below this instruction I will paste raw questions and answers, possibly messy or informally formatted.
+
+Only produce these question types: ${chosen.map(t => t.label).join(', ')}. If part of the material doesn't cleanly fit any of these, pick the closest fit among them, or leave that item out entirely rather than inventing a type that isn't listed.
+
+Use exactly one of these object shapes depending on type:
+
+${schemaBlock}
+
+Shared rules:
+1. "id" must be a short unique string per question.
+2. "hint" should nudge without giving the answer away.
+3. "topic_tag" is a short topic/chapter/concept label.
+4. Preserve the source material's terminology — do not invent facts.
+5. For subjective questions, choose marks of 2, 5, or 10 (default 5 if unclear) and write a full model answer.
+6. For match_following, keep every pair unambiguous — no two "right" values should be identical.
+
+IMPORTANT — LENGTH LIMIT: Your entire JSON output must stay under 20,000 characters total. This is the practical ceiling for pasting text into most Android apps. If the source material would produce more, include fewer complete questions rather than cutting one short — never truncate a JSON object mid-way.
+
+Return ONLY the raw JSON array. No prose, no markdown fences.
+
+Raw material follows:`;
+}
+
+/* ---------- conversion prompt (study / flashcards, 80/20) ---------- */
+function buildStudyConversionPrompt(){
+  return `You are turning raw study material into flashcards for Stellar's Quiz Time, a personal study app, applying the 80/20 (Pareto) principle.
+
+First, identify the roughly 20% of concepts in this material that are most likely to account for 80% of exam value — the load-bearing ideas everything else depends on. Mark those flashcards "priority":"high". Mark the remaining supplementary flashcards "priority":"normal".
+
+Convert the material into a JSON array of flashcard objects shaped exactly like this:
+{"id":"unique short string","front":"a prompt, term, or question","back":"a clear, complete answer/explanation","topic_tag":"short topic label","priority":"high" or "normal"}
+
+Rules:
+1. List all "high" priority cards first in the array, then "normal" ones after.
+2. Keep "front" short enough to read at a glance; keep "back" complete but concise — a few sentences at most.
+3. Don't invent facts not supported by the material.
+4. Prefer more, smaller cards over few dense ones — each card should test one idea.
+
+IMPORTANT — LENGTH LIMIT: Your entire JSON output must stay under 20,000 characters total, the practical ceiling for pasting into most Android apps. If the material would produce more, keep every high-priority card and trim normal-priority ones rather than cutting a card short.
+
+Return ONLY the raw JSON array. No prose, no markdown fences.
+
+Raw material follows:`;
+}
+
+/* ---------- data helpers ---------- */
+function normalizeQuestion(q, index){
+  const type = ['mcq','fill_blank','subjective','true_false','match_following'].includes(q && q.type) ? q.type : 'subjective';
+  const base = {
+    id: String((q && q.id) || ('q' + Date.now() + '_' + index)),
+    type,
+    question_text: String((q && (q.question_text || q.question)) || '').trim(),
+    marks: [2,5,10].includes(Number(q && q.marks)) ? Number(q.marks) : null,
+    hint: String((q && q.hint) || '').trim(),
+    topic_tag: String((q && q.topic_tag) || '').trim(),
+    model_answer: String((q && q.model_answer) || '').trim(),
+    options: [], correct_answer: '', pairs: [],
+  };
+  if(type === 'mcq'){
+    base.options = Array.isArray(q && q.options) ? q.options.map(String).slice(0,4) : [];
+    base.correct_answer = Array.isArray(q && q.correct_answer) ? q.correct_answer.map(String) : String((q && q.correct_answer) || '').trim();
+  } else if(type === 'fill_blank'){
+    base.correct_answer = Array.isArray(q && q.correct_answer) ? q.correct_answer.map(String) : String((q && q.correct_answer) || '').trim();
+  } else if(type === 'true_false'){
+    const ca = String((q && q.correct_answer) || '').trim().toLowerCase();
+    base.correct_answer = (ca === 'true' || ca === 'false') ? ca : 'true';
+  } else if(type === 'match_following'){
+    base.pairs = Array.isArray(q && q.pairs)
+      ? q.pairs.map(p => ({ left: String((p && p.left) || '').trim(), right: String((p && p.right) || '').trim() })).filter(p => p.left || p.right).slice(0,6)
+      : [];
+  }
+  return base;
+}
+function normalizeCard(c, index){
+  return {
+    id: String((c && c.id) || ('c' + Date.now() + '_' + index)),
+    front: String((c && (c.front || c.question)) || '').trim(),
+    back: String((c && (c.back || c.answer)) || '').trim(),
+    topic_tag: String((c && c.topic_tag) || '').trim(),
+    priority: (c && String(c.priority).toLowerCase() === 'high') ? 'high' : 'normal',
+  };
+}
+
+function scoreSubjective(answer, model, marks){
+  const clean = (s) => String(s||'').toLowerCase().replace(/[^a-z0-9\s]/g,' ');
+  const stop = new Set(['the','and','for','with','that','this','from','into','are','was','were','has','have','been','can','may','which','what','how','why','is','of','to','in','a','an','on','as','by','or','it','be']);
+  const tokens = clean(model).split(/\s+/).filter(x => x.length > 3 && !stop.has(x));
+  const answerTokens = new Set(clean(answer).split(/\s+/).filter(Boolean));
+  const keywords = [...new Set(tokens)];
+  const hits = keywords.filter(x => answerTokens.has(x)).length;
+  const ratio = keywords.length ? Math.min(1, hits / Math.min(keywords.length, 18)) : 0;
+  const earned = Math.max(0, Math.min(marks || 5, Math.round(ratio * (marks || 5) * 2) / 2));
+  return { earned, max: marks || 5, ratio, hits, keywords: keywords.slice(0,12) };
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+/* ---------- navigation ---------- */
+let screen = 'home';
+function navTo(target){
+  flushStudyTime();
+  screen = target;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const el = document.getElementById('screen-' + target);
+  if(el) el.classList.add('active');
+  const navMap = { home:'nav-btn-home', study:'nav-btn-study', bank:'nav-btn-bank', stats:'nav-btn-stats' };
+  if(navMap[target]) document.getElementById(navMap[target]).classList.add('active');
+  const bottomNav = document.getElementById('bottom-nav');
+  bottomNav.style.display = ['home','study','bank','stats'].includes(target) ? 'flex' : 'none';
+  if(target === 'home') renderHome();
+  if(target === 'study') renderStudy();
+  if(target === 'bank') renderBank();
+  if(target === 'stats') renderStats();
+}
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+/* ---------- clipboard / share (robust, works from file://) ---------- */
+async function copyText(text, label){
+  label = label || 'Copied ✿';
+  let ok = false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    }
+  }catch(e){ ok = false; }
+  if(!ok){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.top = '0';
+      ta.style.left = '0';
+      ta.style.width = '2em';
+      ta.style.height = '2em';
+      ta.style.padding = '0';
+      ta.style.border = 'none';
+      ta.style.outline = 'none';
+      ta.style.boxShadow = 'none';
+      ta.style.background = 'transparent';
+      ta.style.fontSize = '16px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      ta.setSelectionRange(0, text.length);
+      ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){ ok = false; }
+  }
+  toast(ok ? label : 'Auto-copy blocked by your browser — tap "Show prompt text" and copy manually.');
+}
+async function shareText(text){
+  if(navigator.share){
+    try{ await navigator.share({ text }); return; }catch(e){ /* user cancelled — fall through */ }
+  }
+  copyText(text, 'Sharing not supported here — copied instead ✿');
+}
+document.getElementById('copy-prompt-btn').addEventListener('click', () => copyText(buildConversionPrompt(), 'Prompt copied ✿'));
+document.getElementById('share-prompt-btn').addEventListener('click', () => shareText(buildConversionPrompt()));
+document.getElementById('modal-copy-btn').addEventListener('click', () => copyText(document.getElementById('modal-grading-prompt').value, 'Prompt copied ✿'));
+document.getElementById('modal-share-btn').addEventListener('click', () => shareText(document.getElementById('modal-grading-prompt').value));
+document.getElementById('raw-prompt-toggle').addEventListener('click', () => {
+  const box = document.getElementById('raw-prompt-box');
+  const btn = document.getElementById('raw-prompt-toggle');
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? 'Hide prompt text' : 'Show prompt text (manual copy)';
+  if(show){ box.value = buildConversionPrompt(); box.focus(); box.select(); }
+});
+document.getElementById('copy-study-prompt-btn').addEventListener('click', () => copyText(buildStudyConversionPrompt(), 'Prompt copied ✿'));
+document.getElementById('share-study-prompt-btn').addEventListener('click', () => shareText(buildStudyConversionPrompt()));
+document.getElementById('raw-study-prompt-toggle').addEventListener('click', () => {
+  const box = document.getElementById('raw-study-prompt-box');
+  const btn = document.getElementById('raw-study-prompt-toggle');
+  const show = box.style.display === 'none';
+  box.style.display = show ? 'block' : 'none';
+  btn.textContent = show ? 'Hide prompt text' : 'Show prompt text (manual copy)';
+  if(show){ box.value = buildStudyConversionPrompt(); box.focus(); box.select(); }
+});
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const sets = Object.entries(state.sets);
+  const totalQuestions = sets.reduce((n,[,qs]) => n + qs.length, 0);
+  const attempted = state.attempts.length;
+  const mastery = attempted ? Math.round((state.attempts.filter(a => a.correct === true || (a.estimatedMax && a.estimatedEarned/a.estimatedMax >= 0.7)).length / attempted) * 100) : 0;
+
+  const days = new Set((state.activity||[]).map(d => d.slice(0,10)));
+  let streak = 0; const d = new Date();
+  while(days.has(d.toISOString().slice(0,10))){ streak += 1; d.setDate(d.getDate()-1); }
+
+  document.getElementById('home-streak').textContent = streak + ' day' + (streak === 1 ? '' : 's');
+  document.getElementById('home-mastery').textContent = mastery + '%';
+  document.getElementById('home-total-q').textContent = String(totalQuestions);
+
+  const featured = sets[0];
+  document.getElementById('feature-title').textContent = featured ? featured[0] : 'Import your first study set';
+  document.getElementById('feature-sub').textContent = featured ? (featured[1].length + ' questions waiting for you ✿') : 'Turn your notes into a practice quiz.';
+  const fbtn = document.getElementById('feature-btn');
+  fbtn.textContent = featured ? 'Start practicing →' : 'Import study material →';
+  fbtn.onclick = () => featured ? startSet(featured[0]) : startQuizImportFresh();
+
+  const listEl = document.getElementById('home-set-list');
+  if(!sets.length){
+    listEl.innerHTML = '<div class="card"><div class="empty-text">No sets yet — import your first one ✿</div></div>';
+  } else {
+    listEl.innerHTML = sets.slice(0,6).map(([name, qs], i) => {
+      const topics = Array.from(new Set(qs.map(q => q.topic_tag).filter(Boolean))).slice(0,2).join(' · ') || 'mixed topics';
+      return `<div class="set-row" data-idx="${i}">
+        <div class="set-icon">▱</div>
+        <div><div class="set-name">${escHtml(name)}</div><div class="set-meta">${qs.length} questions · ${escHtml(topics)}</div></div>
+        <div class="chevron">›</div>
+      </div>`;
+    }).join('');
+    listEl.querySelectorAll('.set-row').forEach(el => {
+      el.addEventListener('click', () => startSet(sets[Number(el.dataset.idx)][0]));
+    });
+  }
+}
+function startQuizImportFresh(){
+  pendingAppendTarget = null;
+  const inp = document.getElementById('import-set-name');
+  inp.disabled = false; inp.value = '';
+  document.getElementById('import-json-title').textContent = '3. Paste the JSON result';
+  navTo('import');
+}
+
+/* ---------- QUIZ IMPORT ---------- */
+let pendingAppendTarget = null;
+function processImport(){
+  const raw = document.getElementById('import-json-input').value;
+  try{
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || parsed.length === 0) throw new Error('empty');
+    const normalized = parsed.map(normalizeQuestion).filter(x => x.question_text);
+    if(!normalized.length) throw new Error('no questions');
+    preview = normalized;
+    previewSetName = document.getElementById('import-set-name').value;
+    renderPreview();
+    navTo('preview');
+  }catch(e){
+    alert('Not valid JSON.\n\nPaste the JSON array produced by the conversion prompt. It should start with [ and end with ].');
+  }
+}
+
+/* ---------- QUIZ PREVIEW / EDIT ---------- */
+let preview = [];
+let previewSetName = '';
+let editorIndex = null;
+
+function renderPreview(){
+  document.getElementById('preview-count').textContent = preview.length + ' question' + (preview.length === 1 ? '' : 's') + ' ready ✿';
+  const list = document.getElementById('preview-list');
+  list.innerHTML = preview.map((item, i) => {
+    const pills = [`<span class="pill">${escHtml(typeLabel(item.type))}</span>`];
+    if(item.marks) pills.push(`<span class="pill">${item.marks} marks</span>`);
+    if(item.topic_tag) pills.push(`<span class="pill">${escHtml(item.topic_tag)}</span>`);
+    return `<div class="preview-item" data-idx="${i}">
+      <div class="preview-num">${i+1}</div>
+      <div style="flex:1;"><div class="preview-q">${escHtml(item.question_text || '(empty question)')}</div><div style="margin-top:6px;">${pills.join('')}</div></div>
+      <div class="chevron">›</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.preview-item').forEach(el => {
+    el.addEventListener('click', () => openEditModal(Number(el.dataset.idx)));
+  });
+}
+
+function openEditModal(i){
+  editorIndex = i;
+  const item = preview[i];
+  document.getElementById('edit-modal-title').textContent = 'Edit question ' + (i+1);
+  document.getElementById('edit-question-text').value = item.question_text;
+  document.getElementById('edit-correct-answer').value = Array.isArray(item.correct_answer) ? item.correct_answer.join(' / ') : item.correct_answer;
+  document.getElementById('edit-model-answer').value = item.model_answer;
+  document.getElementById('edit-hint').value = item.hint;
+  document.getElementById('edit-topic').value = item.topic_tag;
+
+  const typeWrap = document.getElementById('edit-type-choices');
+  typeWrap.innerHTML = TYPE_DEFS.map(t =>
+    `<div class="type-choice ${item.type===t.key?'active':''}" data-type="${t.key}">${typeLabel(t.key)}</div>`).join('');
+  typeWrap.querySelectorAll('.type-choice').forEach(el => el.addEventListener('click', () => setEditType(el.dataset.type)));
+
+  const marksWrap = document.getElementById('edit-marks-choices');
+  const marksOpts = [null,2,5,10];
+  marksWrap.innerHTML = marksOpts.map((m,mi) =>
+    `<div class="type-choice ${item.marks===m?'active':''}" data-mi="${mi}">${m || '—'}</div>`).join('');
+  marksWrap.querySelectorAll('.type-choice').forEach(el => el.addEventListener('click', () => setEditMarks(marksOpts[Number(el.dataset.mi)])));
+
+  document.getElementById('edit-options-wrap').style.display = item.type === 'mcq' ? 'block' : 'none';
+  document.getElementById('edit-tf-wrap').style.display = item.type === 'true_false' ? 'block' : 'none';
+  document.getElementById('edit-pairs-wrap').style.display = item.type === 'match_following' ? 'block' : 'none';
+  document.getElementById('edit-correct-answer-wrap').style.display = (item.type === 'mcq' || item.type === 'fill_blank') ? 'block' : 'none';
+
+  for(let k=0;k<4;k++){ document.getElementById('edit-opt-'+k).value = (item.options && item.options[k]) || ''; }
+
+  if(item.type === 'true_false'){
+    const tfWrap = document.getElementById('edit-tf-choices');
+    tfWrap.innerHTML = ['true','false'].map(v =>
+      `<div class="type-choice ${item.correct_answer===v?'active':''}" data-tf="${v}">${v==='true'?'True':'False'}</div>`).join('');
+    tfWrap.querySelectorAll('.type-choice').forEach(el => el.addEventListener('click', () => {
+      preview[editorIndex].correct_answer = el.dataset.tf;
+      openEditModal(editorIndex);
+    }));
+  }
+
+  if(item.type === 'match_following'){
+    const rows = document.getElementById('edit-pairs-rows');
+    const pairs = item.pairs && item.pairs.length ? item.pairs : [];
+    rows.innerHTML = Array.from({length:6}).map((_,k) => {
+      const p = pairs[k] || { left:'', right:'' };
+      return `<div class="btn-row" style="margin-top:6px;">
+        <input type="text" id="edit-pair-left-${k}" placeholder="Left ${k+1}" value="${escHtml(p.left)}" style="margin:0;" />
+        <input type="text" id="edit-pair-right-${k}" placeholder="Right ${k+1}" value="${escHtml(p.right)}" style="margin:0;" />
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('edit-modal').classList.add('active');
+}
+function setEditType(t){ preview[editorIndex].type = t; openEditModal(editorIndex); }
+function setEditMarks(m){ preview[editorIndex].marks = m; openEditModal(editorIndex); }
+function closeEditModal(){
+  if(editorIndex !== null){
+    const item = preview[editorIndex];
+    item.question_text = document.getElementById('edit-question-text').value.trim();
+    item.model_answer = document.getElementById('edit-model-answer').value.trim();
+    item.hint = document.getElementById('edit-hint').value.trim();
+    item.topic_tag = document.getElementById('edit-topic').value.trim();
+    if(item.type === 'mcq'){
+      item.options = [0,1,2,3].map(k => document.getElementById('edit-opt-'+k).value.trim());
+      item.correct_answer = document.getElementById('edit-correct-answer').value.trim();
+    } else if(item.type === 'fill_blank'){
+      item.correct_answer = document.getElementById('edit-correct-answer').value.trim();
+    } else if(item.type === 'match_following'){
+      item.pairs = Array.from({length:6}, (_,k) => ({
+        left: document.getElementById('edit-pair-left-'+k).value.trim(),
+        right: document.getElementById('edit-pair-right-'+k).value.trim(),
+      })).filter(p => p.left || p.right);
+    }
+  }
+  editorIndex = null;
+  document.getElementById('edit-modal').classList.remove('active');
+  renderPreview();
+}
+
+function savePreviewToBank(){
+  if(!preview.length) return;
+  let name;
+  if(pendingAppendTarget){
+    name = pendingAppendTarget;
+    state.sets[name] = [...(state.sets[name]||[]), ...preview];
+  } else {
+    const sets = Object.entries(state.sets);
+    name = (previewSetName || '').trim() || ('Study set ' + (sets.length + 1));
+    state.sets[name] = preview;
+  }
+  saveState();
+  const wasAppend = !!pendingAppendTarget;
+  preview = [];
+  previewSetName = '';
+  pendingAppendTarget = null;
+  document.getElementById('import-set-name').value = '';
+  document.getElementById('import-set-name').disabled = false;
+  document.getElementById('import-json-input').value = '';
+  toast(wasAppend ? ('Added to ' + name + ' ✿') : (name + ' saved to your question bank ✿'));
+  navTo(wasAppend ? 'bank' : 'home');
+}
+
+/* ---------- QUIZ ---------- */
+let currentSet = null;
+let sessionQuestions = [];
+let sessionResults = [];
+let quizIndex = 0;
+let result = null;
+let hintVisible = false;
+let modelVisible = false;
+let matchRenderPool = [];
+
+function currentQuestion(){ return sessionQuestions[quizIndex]; }
+
+function startSet(name){
+  const bank = state.sets[name] || [];
+  currentSet = name;
+  sessionQuestions = shuffle(bank).map(q => q.type === 'mcq' ? { ...q, options: shuffle(q.options) } : { ...q });
+  sessionResults = new Array(sessionQuestions.length).fill(null);
+  quizIndex = 0;
+  result = null;
+  hintVisible = false;
+  modelVisible = false;
+  quizStartTime = Date.now();
+  navTo('quiz');
+  document.getElementById('bottom-nav').style.display = 'none';
+  markActivity();
+  renderQuiz();
+}
+function exitQuiz(){
+  flushStudyTime();
+  quizStartTime = null;
+  currentSet = null;
+  navTo('home');
+}
+
+function renderQuiz(){
+  const q = currentQuestion();
+  if(!q){ navTo('home'); return; }
+  const total = sessionQuestions.length;
+  document.getElementById('quiz-counter').textContent = `QUESTION ${quizIndex+1} OF ${total}`;
+  document.getElementById('quiz-type-pill').textContent = typeLabel(q.type);
+  const answeredCount = sessionResults.filter(Boolean).length;
+  document.getElementById('quiz-progress-bar').style.width = ((answeredCount/total)*100) + '%';
+
+  const navStrip = document.getElementById('quiz-nav-strip');
+  navStrip.innerHTML = sessionQuestions.map((qq,i) => {
+    let cls = 'qnav-btn';
+    if(i === quizIndex) cls += ' current';
+    else if(sessionResults[i]) cls += ' answered';
+    return `<button class="${cls}" data-idx="${i}">${i+1}</button>`;
+  }).join('');
+  navStrip.querySelectorAll('.qnav-btn').forEach(btn => {
+    btn.addEventListener('click', () => jumpToQuestion(Number(btn.dataset.idx)));
+  });
+
+  const pills = [];
+  if(q.marks) pills.push(`<span class="pill">${q.marks} marks</span>`);
+  if(q.topic_tag) pills.push(`<span class="pill">${escHtml(q.topic_tag)}</span>`);
+  document.getElementById('quiz-meta-pills').innerHTML = pills.join('');
+  document.getElementById('quiz-question-text').textContent = q.question_text;
+
+  const mcqWrap = document.getElementById('quiz-mcq-wrap');
+  const fillWrap = document.getElementById('quiz-fill-wrap');
+  const subjWrap = document.getElementById('quiz-subj-wrap');
+  const matchWrap = document.getElementById('quiz-match-wrap');
+  mcqWrap.style.display = 'none'; fillWrap.style.display = 'none'; subjWrap.style.display = 'none'; matchWrap.style.display = 'none';
+
+  if(q.type === 'mcq' || q.type === 'true_false'){
+    mcqWrap.style.display = 'block';
+    const opts = q.type === 'mcq' ? (q.options||[]) : ['True','False'];
+    mcqWrap.innerHTML = opts.map((opt,i) => {
+      let cls = '';
+      if(result){
+        const isCorrectOpt = String(q.correct_answer).trim().toLowerCase() === String(opt).trim().toLowerCase();
+        if(isCorrectOpt) cls = 'correct';
+        else if(result.chosen === opt) cls = 'wrong';
+      }
+      const check = (result && String(q.correct_answer).trim().toLowerCase() === String(opt).trim().toLowerCase()) ? '<span class="opt-check">✓</span>' : '';
+      const letter = q.type === 'mcq' ? String.fromCharCode(65+i) : opt[0];
+      return `<button class="option-btn ${cls}" data-idx="${i}" ${result?'disabled':''}>
+        <span class="opt-letter">${letter}</span><span style="flex:1;">${escHtml(opt)}</span>${check}
+      </button>`;
+    }).join('');
+    if(!result){
+      mcqWrap.querySelectorAll('.option-btn').forEach(btn => btn.addEventListener('click', () => selectOption(Number(btn.dataset.idx))));
+    }
+  } else if(q.type === 'fill_blank'){
+    fillWrap.style.display = 'block';
+    const input = document.getElementById('quiz-fill-input');
+    input.value = result ? (result.typed || '') : '';
+    input.disabled = !!result;
+    document.getElementById('quiz-fill-check-btn').disabled = !!result;
+    const resBox = document.getElementById('quiz-fill-result');
+    if(result){
+      const accepted = Array.isArray(q.correct_answer) ? q.correct_answer.join(' / ') : q.correct_answer;
+      resBox.innerHTML = `<div class="result-box ${result.correct?'correct':'wrong'}">${result.correct ? 'Correct ✿' : 'Not quite — ' + escHtml(accepted)}</div>`;
+    } else resBox.innerHTML = '';
+  } else if(q.type === 'match_following'){
+    matchWrap.style.display = 'block';
+    const rightPool = result ? result.rightPool : shuffle((q.pairs||[]).map(p => p.right));
+    matchRenderPool = rightPool;
+    const rowsEl = document.getElementById('quiz-match-rows');
+    rowsEl.innerHTML = (q.pairs||[]).map((p,i) => {
+      const sel = result ? (result.selections[i] || '') : '';
+      const disabled = result ? 'disabled' : '';
+      const isCorrect = result && sel === p.right;
+      const selStyle = result ? (isCorrect ? 'border-color:var(--mint-deep);background:var(--mint);' : 'border-color:#E59BA5;background:var(--wrong);') : '';
+      const resultLine = result ? `<div style="font-size:11px;font-weight:800;margin-top:2px;color:${isCorrect?'#3f9c6e':'#c94f4f'};">${isCorrect ? '✓ correct' : '✕ correct answer: ' + escHtml(p.right)}</div>` : '';
+      return `<div style="margin-top:8px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;font-weight:800;font-size:13px;">${escHtml(p.left)}</div>
+          <select data-idx="${i}" ${disabled} style="flex:1;margin:0;${selStyle}">
+            <option value="">Choose…</option>
+            ${rightPool.map(r => `<option value="${escHtml(r)}" ${sel===r?'selected':''}>${escHtml(r)}</option>`).join('')}
+          </select>
+        </div>
+        ${resultLine}
+      </div>`;
+    }).join('');
+    document.getElementById('quiz-match-check-btn').style.display = result ? 'none' : 'flex';
+    const resBox = document.getElementById('quiz-match-result');
+    resBox.innerHTML = result ? `<div class="assessment-box"><div class="assessment-title">Matches correct</div><div class="assessment-score">${result.correctCount}/${result.total}</div></div>` : '';
+  } else if(q.type === 'subjective'){
+    subjWrap.style.display = 'block';
+    const input = document.getElementById('quiz-subj-input');
+    input.value = result ? (result.typed || '') : '';
+    input.disabled = !!result;
+    document.getElementById('quiz-subj-submit-btn').style.display = result ? 'none' : 'flex';
+    document.getElementById('quiz-subj-actions').style.display = result ? 'block' : 'none';
+    const resBox = document.getElementById('quiz-subj-result');
+    if(result){
+      resBox.innerHTML = `<div class="assessment-box"><div class="assessment-title">Quick performance estimate</div>
+        <div class="assessment-score">${result.estimate.earned}/${result.estimate.max} marks</div>
+        <div class="assessment-help">This offline estimate uses key-term overlap with the stored model answer. It is a practice aid, not a true grader.</div></div>`;
+    } else resBox.innerHTML = '';
+    modelVisible = false;
+    document.getElementById('quiz-model-box').style.display = 'none';
+    document.getElementById('quiz-model-toggle-btn').textContent = 'Show model answer';
+  }
+
+  hintVisible = false;
+  document.getElementById('quiz-hint-box').style.display = 'none';
+  document.getElementById('quiz-hint-toggle-btn').textContent = 'Show hint';
+
+  document.getElementById('quiz-prev-btn').disabled = quizIndex === 0;
+  const nextBtn = document.getElementById('quiz-next-btn');
+  const skippable = (q.type === 'subjective' || q.type === 'match_following');
+  nextBtn.style.display = (result || skippable) ? 'flex' : 'none';
+  const isLast = quizIndex === total-1;
+  nextBtn.textContent = isLast ? 'Finish assessment ✦' : (result ? 'Next question →' : 'Skip → (counts as 0)');
+  document.getElementById('quiz-finish-btn').style.display = answeredCount > 0 ? 'flex' : 'none';
+}
+
+function recordAttempt(entry){
+  state.attempts = [...state.attempts, { ...entry, timestamp: new Date().toISOString() }].slice(-1000);
+  markActivity();
+}
+
+function selectOption(i){
+  if(result) return;
+  const q = currentQuestion();
+  const opts = q.type === 'mcq' ? q.options : ['True','False'];
+  const chosen = opts[i];
+  const correct = String(q.correct_answer).trim().toLowerCase() === String(chosen).trim().toLowerCase();
+  result = { type:q.type, correct, chosen };
+  sessionResults[quizIndex] = result;
+  recordAttempt({ set: currentSet, qid: q.id, topic: q.topic_tag, type: q.type, correct, question: q.question_text, answer: chosen });
+  flushStudyTime();
+  renderQuiz();
+}
+function checkFillAnswer(){
+  if(result) return;
+  const q = currentQuestion();
+  const accepted = Array.isArray(q.correct_answer) ? q.correct_answer : [q.correct_answer];
+  const typed = document.getElementById('quiz-fill-input').value;
+  const correct = accepted.some(a => String(a).trim().toLowerCase() === typed.trim().toLowerCase());
+  result = { type:'fill_blank', correct, typed };
+  sessionResults[quizIndex] = result;
+  recordAttempt({ set: currentSet, qid: q.id, topic: q.topic_tag, type: q.type, correct, question: q.question_text, answer: typed });
+  flushStudyTime();
+  renderQuiz();
+}
+function checkMatchAnswers(){
+  if(result) return;
+  const q = currentQuestion();
+  const selects = document.querySelectorAll('#quiz-match-rows select');
+  const selections = Array.from(selects).map(s => s.value);
+  let correctCount = 0;
+  (q.pairs||[]).forEach((p,i) => { if(selections[i] && selections[i] === p.right) correctCount++; });
+  const total = (q.pairs||[]).length;
+  result = { type:'match_following', correctCount, total, selections, rightPool: matchRenderPool };
+  sessionResults[quizIndex] = result;
+  recordAttempt({ set: currentSet, qid: q.id, topic: q.topic_tag, type: q.type, question: q.question_text, answer: selections.join(' | '), estimatedEarned: correctCount, estimatedMax: total, feedback:'' });
+  flushStudyTime();
+  renderQuiz();
+}
+function submitSubjectiveAnswer(){
+  const answer = document.getElementById('quiz-subj-input').value;
+  if(!answer.trim() || result) return;
+  const q = currentQuestion();
+  const estimate = scoreSubjective(answer, q.model_answer, q.marks);
+  result = { type:'subjective', estimate, typed: answer };
+  sessionResults[quizIndex] = result;
+  recordAttempt({ set: currentSet, qid: q.id, topic: q.topic_tag, type: q.type, question: q.question_text, answer, estimatedEarned: estimate.earned, estimatedMax: estimate.max, feedback:'' });
+  flushStudyTime();
+  renderQuiz();
+}
+function toggleHint(){
+  hintVisible = !hintVisible;
+  const q = currentQuestion();
+  document.getElementById('quiz-hint-box').style.display = hintVisible ? 'block' : 'none';
+  document.getElementById('quiz-hint-box').innerHTML = `<div class="box-title">Hint</div><div>${escHtml(q.hint || 'No hint stored for this question.')}</div>`;
+  document.getElementById('quiz-hint-toggle-btn').textContent = hintVisible ? 'Hide hint' : 'Show hint';
+}
+function toggleModelAnswer(){
+  modelVisible = !modelVisible;
+  const q = currentQuestion();
+  document.getElementById('quiz-model-box').style.display = modelVisible ? 'block' : 'none';
+  document.getElementById('quiz-model-box').innerHTML = `<div class="box-title">Model answer</div><div>${escHtml(q.model_answer || 'No model answer stored.')}</div>`;
+  document.getElementById('quiz-model-toggle-btn').textContent = modelVisible ? 'Hide model answer' : 'Show model answer';
+}
+
+function skipCurrentQuestion(){
+  if(result) return;
+  const q = currentQuestion();
+  let r, extra = {};
+  if(q.type === 'subjective'){
+    r = { type:'subjective', estimate:{ earned:0, max:q.marks||5, ratio:0, hits:0, keywords:[] }, typed:'', skipped:true };
+    extra = { estimatedEarned:0, estimatedMax:q.marks||5 };
+  } else if(q.type === 'match_following'){
+    const rp = shuffle((q.pairs||[]).map(p => p.right));
+    r = { type:'match_following', correctCount:0, total:(q.pairs||[]).length, selections:new Array((q.pairs||[]).length).fill(''), rightPool: rp, skipped:true };
+    extra = { estimatedEarned:0, estimatedMax:(q.pairs||[]).length };
+  } else {
+    r = { type:q.type, correct:false, chosen:null, typed:'', skipped:true };
+    extra = { correct:false };
+  }
+  result = r;
+  sessionResults[quizIndex] = r;
+  recordAttempt({ set: currentSet, qid: q.id, topic: q.topic_tag, type: q.type, question: q.question_text, answer:'(skipped)', feedback:'', ...extra });
+  flushStudyTime();
+}
+
+function jumpToQuestion(i){
+  flushStudyTime();
+  quizIndex = i;
+  result = sessionResults[i];
+  hintVisible = false;
+  modelVisible = false;
+  renderQuiz();
+}
+function prevQuestion(){ if(quizIndex > 0) jumpToQuestion(quizIndex - 1); }
+function nextQuestion(){
+  const q = currentQuestion();
+  if(!result){
+    if(q.type === 'subjective' || q.type === 'match_following') skipCurrentQuestion();
+    else return;
+  }
+  if(quizIndex >= sessionQuestions.length - 1){ finishQuiz(); return; }
+  jumpToQuestion(quizIndex + 1);
+}
+function finishQuiz(){
+  flushStudyTime();
+  navTo('results');
+  document.getElementById('bottom-nav').style.display = 'none';
+  renderResults();
+}
+
+/* ---------- AI GRADING MODAL ---------- */
+function openGradingModal(){
+  const q = currentQuestion();
+  const answer = document.getElementById('quiz-subj-input').value;
+  const prompt = `Grade my answer to this ${q.marks || ''}-mark question against the model answer/rubric below. Give me a concise performance assessment: (1) what I got right, (2) what I missed or got wrong, (3) roughly how many marks I would earn, and (4) one concrete improvement. Do not simply say right/wrong.
+
+Question: ${q.question_text}
+
+Model answer/rubric: ${q.model_answer || '(not provided — use the supplied question and your own subject knowledge)'}
+
+My answer: ${answer || '(no answer written)'}`;
+  document.getElementById('modal-grading-prompt').value = prompt;
+  document.getElementById('modal-feedback-input').value = '';
+  document.getElementById('grading-modal').classList.add('active');
+}
+function closeGradingModal(){ document.getElementById('grading-modal').classList.remove('active'); }
+function saveAIFeedback(){
+  const fb = document.getElementById('modal-feedback-input').value.trim();
+  if(!fb) return;
+  if(state.attempts.length){
+    state.attempts[state.attempts.length - 1].feedback = fb;
+    saveState();
+  }
+  closeGradingModal();
+  toast('AI assessment attached to this attempt ✿');
+}
+
+/* ---------- RESULTS ---------- */
+function sessionAttempts(){
+  const answeredIds = new Set(sessionQuestions.filter((q,i) => sessionResults[i]).map(q => q.id));
+  const byQid = new Map();
+  state.attempts.filter(a => a.set === currentSet && answeredIds.has(a.qid)).forEach(a => byQid.set(a.qid, a));
+  return Array.from(byQid.values());
+}
+function renderResults(){
+  const attempts = sessionAttempts();
+  const correct = attempts.filter(a => a.correct === true || (a.estimatedMax && a.estimatedEarned/a.estimatedMax >= .7)).length;
+  const subjective = attempts.filter(a => a.estimatedMax);
+  const marks = subjective.reduce((s,a) => s + a.estimatedEarned, 0);
+  const max = subjective.reduce((s,a) => s + a.estimatedMax, 0);
+  document.getElementById('results-score').textContent = (attempts.length ? Math.round(correct/attempts.length*100) : 0) + '%';
+  document.getElementById('results-subj-summary').textContent = subjective.length ? `Written/matching estimate: ${marks}/${max} marks across ${subjective.length} questions.` : '';
+  document.getElementById('results-set-name').textContent = currentSet || '';
+  document.getElementById('results-attempt-count').textContent = `${attempts.length} question attempts recorded. AI feedback is included where you pasted it.`;
+  document.getElementById('results-retry-btn').onclick = () => startSet(currentSet);
+}
+
+function assessmentText(){
+  const rows = sessionAttempts();
+  const lines = [
+    `STELLAR'S QUIZ TIME — ASSESSMENT`,
+    `Set: ${currentSet}`,
+    `Generated: ${new Date().toLocaleString()}`,
+    '',
+  ];
+  rows.forEach((a,i) => {
+    lines.push(`${i+1}. ${a.question}`);
+    lines.push(`Type: ${typeLabel(a.type)}${a.estimatedMax ? ` | Estimated: ${a.estimatedEarned}/${a.estimatedMax}` : ''}`);
+    lines.push(`Answer: ${a.answer || '(none)'}`);
+    if(a.feedback) lines.push(`AI feedback: ${a.feedback}`);
+    else if(a.estimatedMax) lines.push(`Local estimate: ${a.estimatedEarned}/${a.estimatedMax}. Use AI grading for a fuller assessment.`);
+    else lines.push(`Result: ${a.correct ? 'Correct' : 'Incorrect'}`);
+    lines.push('');
+  });
+  return lines.join('\n');
+}
+function exportAssessmentTxt(){
+  const text = assessmentText();
+  const blob = new Blob([text], { type:'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `stellars_quiz_assessment_${Date.now()}.txt`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+  toast('Assessment downloaded ✿');
+}
+function copyAssessmentTxt(){ copyText(assessmentText(), 'Assessment copied ✿'); }
+
+/* ---------- STUDY HUB ---------- */
+function renderStudy(){
+  const decks = Object.entries(state.decks);
+  const list = document.getElementById('study-deck-list');
+  if(!decks.length){
+    list.innerHTML = '<div class="card"><div class="empty-text">No decks yet — import your notes ✿</div></div>';
+    return;
+  }
+  list.innerHTML = decks.map(([name, cards], i) => {
+    const known = cards.filter(c => state.cardProgress[c.id]).length;
+    const highCount = cards.filter(c => c.priority === 'high').length;
+    return `<div class="set-row" data-idx="${i}">
+      <div class="set-icon">◆</div>
+      <div style="flex:1;"><div class="set-name">${escHtml(name)}</div><div class="set-meta">${cards.length} cards · ${highCount} high-yield · ${known}/${cards.length} known</div></div>
+      <div class="chevron">›</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.set-row').forEach(el => {
+    el.addEventListener('click', () => startFlashcards(decks[Number(el.dataset.idx)][0]));
+  });
+}
+function startStudyImport(){
+  pendingAppendDeckTarget = null;
+  const inp = document.getElementById('study-set-name');
+  inp.disabled = false; inp.value = '';
+  document.getElementById('study-import-json-title').textContent = '2. Paste the JSON result';
+  navTo('study-import');
+}
+
+/* ---------- STUDY IMPORT ---------- */
+let pendingAppendDeckTarget = null;
+function processStudyImport(){
+  const raw = document.getElementById('study-json-input').value;
+  try{
+    const parsed = JSON.parse(raw);
+    if(!Array.isArray(parsed) || !parsed.length) throw new Error('empty');
+    const normalized = parsed.map(normalizeCard).filter(c => c.front);
+    if(!normalized.length) throw new Error('none');
+    studyPreview = normalized;
+    studyPreviewName = document.getElementById('study-set-name').value;
+    renderStudyPreview();
+    navTo('study-preview');
+  }catch(e){
+    alert('Not valid JSON.\n\nPaste the JSON array produced by the study conversion prompt.');
+  }
+}
+
+/* ---------- STUDY PREVIEW / EDIT ---------- */
+let studyPreview = [];
+let studyPreviewName = '';
+let studyEditorIndex = null;
+
+function renderStudyPreview(){
+  document.getElementById('study-preview-count').textContent = studyPreview.length + ' card' + (studyPreview.length === 1 ? '' : 's') + ' ready ✿';
+  const list = document.getElementById('study-preview-list');
+  list.innerHTML = studyPreview.map((item, i) => {
+    const pills = [`<span class="pill">${item.priority === 'high' ? 'High-yield' : 'Normal'}</span>`];
+    if(item.topic_tag) pills.push(`<span class="pill">${escHtml(item.topic_tag)}</span>`);
+    return `<div class="preview-item" data-idx="${i}">
+      <div class="preview-num">${i+1}</div>
+      <div style="flex:1;"><div class="preview-q">${escHtml(item.front || '(empty card)')}</div><div style="margin-top:6px;">${pills.join('')}</div></div>
+      <div class="chevron">›</div>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.preview-item').forEach(el => {
+    el.addEventListener('click', () => openStudyEditModal(Number(el.dataset.idx)));
+  });
+}
+function openStudyEditModal(i){
+  studyEditorIndex = i;
+  const item = studyPreview[i];
+  document.getElementById('study-edit-title').textContent = 'Edit card ' + (i+1);
+  document.getElementById('study-edit-front').value = item.front;
+  document.getElementById('study-edit-back').value = item.back;
+  document.getElementById('study-edit-topic').value = item.topic_tag;
+  const pWrap = document.getElementById('study-edit-priority');
+  pWrap.innerHTML = ['high','normal'].map(v =>
+    `<div class="type-choice ${item.priority===v?'active':''}" data-p="${v}">${v==='high'?'High-yield':'Normal'}</div>`).join('');
+  pWrap.querySelectorAll('.type-choice').forEach(el => el.addEventListener('click', () => {
+    studyPreview[studyEditorIndex].priority = el.dataset.p;
+    openStudyEditModal(studyEditorIndex);
+  }));
+  document.getElementById('study-edit-modal').classList.add('active');
+}
+function closeStudyEditModal(){
+  if(studyEditorIndex !== null){
+    const item = studyPreview[studyEditorIndex];
+    item.front = document.getElementById('study-edit-front').value.trim();
+    item.back = document.getElementById('study-edit-back').value.trim();
+    item.topic_tag = document.getElementById('study-edit-topic').value.trim();
+  }
+  studyEditorIndex = null;
+  document.getElementById('study-edit-modal').classList.remove('active');
+  renderStudyPreview();
+}
+function saveStudyPreviewToDeck(){
+  if(!studyPreview.length) return;
+  let name;
+  if(pendingAppendDeckTarget){
+    name = pendingAppendDeckTarget;
+    state.decks[name] = [...(state.decks[name]||[]), ...studyPreview];
+  } else {
+    const decks = Object.entries(state.decks);
+    name = (studyPreviewName || '').trim() || ('Deck ' + (decks.length + 1));
+    state.decks[name] = studyPreview;
+  }
+  saveState();
+  const wasAppend = !!pendingAppendDeckTarget;
+  studyPreview = [];
+  studyPreviewName = '';
+  pendingAppendDeckTarget = null;
+  document.getElementById('study-set-name').value = '';
+  document.getElementById('study-set-name').disabled = false;
+  document.getElementById('study-json-input').value = '';
+  toast(wasAppend ? ('Added to ' + name + ' ✿') : (name + ' saved ✿'));
+  navTo(wasAppend ? 'bank' : 'study');
+}
+
+/* ---------- FLASHCARDS ---------- */
+let flashDeckName = null, flashCards = [], flashIndex = 0, flashFlipped = false, flashHighYieldOnly = true;
+
+function startFlashcards(name){
+  flashDeckName = name;
+  flashHighYieldOnly = true;
+  document.getElementById('flash-highyield-toggle').checked = true;
+  buildFlashSession();
+  navTo('flashcards');
+  document.getElementById('bottom-nav').style.display = 'none';
+  quizStartTime = Date.now();
+  markActivity();
+  renderFlashcard();
+}
+function buildFlashSession(){
+  const all = state.decks[flashDeckName] || [];
+  const highOnly = all.filter(c => c.priority === 'high');
+  const pool = (flashHighYieldOnly && highOnly.length) ? highOnly : all;
+  flashCards = shuffle(pool);
+  flashIndex = 0;
+  flashFlipped = false;
+}
+document.getElementById('flash-highyield-toggle').addEventListener('change', (e) => {
+  flashHighYieldOnly = e.target.checked;
+  buildFlashSession();
+  renderFlashcard();
+});
+document.getElementById('flash-card').addEventListener('click', () => {
+  flashFlipped = !flashFlipped;
+  renderFlashcard();
+});
+function exitFlashcards(){
+  flushStudyTime();
+  quizStartTime = null;
+  flashDeckName = null;
+  navTo('study');
+}
+function renderFlashcard(){
+  const c = flashCards[flashIndex];
+  if(!c){
+    document.getElementById('flash-counter').textContent = 'No cards match this filter';
+    document.getElementById('flash-face-text').textContent = 'Try turning off "High-yield only" to see the rest of the deck.';
+    document.getElementById('flash-face-label').textContent = '';
+    document.getElementById('flash-topic-pill').style.display = 'none';
+    document.getElementById('flash-rate-row').style.display = 'none';
+    return;
+  }
+  document.getElementById('flash-counter').textContent = `CARD ${flashIndex+1} OF ${flashCards.length}`;
+  document.getElementById('flash-progress-bar').style.width = (((flashIndex+1)/flashCards.length)*100) + '%';
+  const topicText = c.topic_tag || (c.priority === 'high' ? 'high-yield' : '');
+  document.getElementById('flash-topic-pill').style.display = topicText ? 'inline-block' : 'none';
+  document.getElementById('flash-topic-pill').textContent = topicText;
+  document.getElementById('flash-face-label').textContent = flashFlipped ? 'BACK' : 'FRONT · TAP TO FLIP';
+  document.getElementById('flash-face-text').textContent = flashFlipped ? c.back : c.front;
+  document.getElementById('flash-rate-row').style.display = flashFlipped ? 'flex' : 'none';
+  document.getElementById('flash-prev-btn').disabled = flashIndex === 0;
+}
+function rateCard(known){
+  const c = flashCards[flashIndex];
+  if(c){ state.cardProgress[c.id] = known; saveState(); }
+  flushStudyTime();
+  goNextFlashcard();
+}
+function nextFlashcard(){ flushStudyTime(); goNextFlashcard(); }
+function goNextFlashcard(){
+  flashFlipped = false;
+  if(flashIndex >= flashCards.length - 1){ toast('Deck complete ✿'); exitFlashcards(); return; }
+  flashIndex++;
+  renderFlashcard();
+}
+function prevFlashcard(){
+  if(flashIndex > 0){ flashFlipped = false; flashIndex--; renderFlashcard(); }
+}
+
+/* ---------- BANK (two parts) ---------- */
+let bankTab = 'quiz';
+function setBankTab(tab){ bankTab = tab; renderBank(); }
+document.getElementById('bank-tab-quiz').addEventListener('click', () => setBankTab('quiz'));
+document.getElementById('bank-tab-study').addEventListener('click', () => setBankTab('study'));
+
+function renderBank(){
+  document.getElementById('bank-tab-quiz').className = 'btn ' + (bankTab === 'quiz' ? 'btn-primary' : 'btn-ghost');
+  document.getElementById('bank-tab-study').className = 'btn ' + (bankTab === 'study' ? 'btn-primary' : 'btn-ghost');
+  document.getElementById('bank-quiz-panel').style.display = bankTab === 'quiz' ? 'block' : 'none';
+  document.getElementById('bank-study-panel').style.display = bankTab === 'study' ? 'block' : 'none';
+  renderBankQuizPanel();
+  renderBankStudyPanel();
+}
+function renderBankQuizPanel(){
+  const sets = Object.entries(state.sets);
+  const list = document.getElementById('bank-quiz-panel');
+  if(!sets.length){
+    list.innerHTML = '<div class="card"><div class="empty-text">Your quiz bank is empty ✿</div></div>';
+    return;
+  }
+  list.innerHTML = sets.map(([name, qs], i) => `<div class="set-row" data-idx="${i}">
+    <div class="set-icon">▱</div>
+    <div style="flex:1;"><div class="set-name">${escHtml(name)}</div><div class="set-meta">${qs.length} questions</div></div>
+    <button class="icon-btn" data-add="${i}" style="margin-right:6px;">＋</button>
+    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;">🗑</button>
+    <div class="chevron">›</div>
+  </div>`).join('');
+  list.querySelectorAll('[data-add]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = sets[Number(btn.dataset.add)][0];
+    pendingAppendTarget = name;
+    const inp = document.getElementById('import-set-name');
+    inp.value = name; inp.disabled = true;
+    document.getElementById('import-json-title').textContent = `Add to "${name}"`;
+    navTo('import');
+  }));
+  list.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteSet(sets[Number(btn.dataset.del)][0]);
+  }));
+  list.querySelectorAll('.set-row').forEach(el => el.addEventListener('click', (e) => {
+    if(e.target.closest('[data-add]') || e.target.closest('[data-del]')) return;
+    startSet(sets[Number(el.dataset.idx)][0]);
+  }));
+}
+function renderBankStudyPanel(){
+  const decks = Object.entries(state.decks);
+  const list = document.getElementById('bank-study-panel');
+  if(!decks.length){
+    list.innerHTML = '<div class="card"><div class="empty-text">No decks yet ✿</div></div>';
+    return;
+  }
+  list.innerHTML = decks.map(([name, cards], i) => `<div class="set-row" data-idx="${i}">
+    <div class="set-icon">◆</div>
+    <div style="flex:1;"><div class="set-name">${escHtml(name)}</div><div class="set-meta">${cards.length} cards</div></div>
+    <button class="icon-btn" data-add="${i}" style="margin-right:6px;">＋</button>
+    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;">🗑</button>
+    <div class="chevron">›</div>
+  </div>`).join('');
+  list.querySelectorAll('[data-add]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const name = decks[Number(btn.dataset.add)][0];
+    pendingAppendDeckTarget = name;
+    const inp = document.getElementById('study-set-name');
+    inp.value = name; inp.disabled = true;
+    document.getElementById('study-import-json-title').textContent = `Add to "${name}"`;
+    navTo('study-import');
+  }));
+  list.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    deleteDeck(decks[Number(btn.dataset.del)][0]);
+  }));
+  list.querySelectorAll('.set-row').forEach(el => el.addEventListener('click', (e) => {
+    if(e.target.closest('[data-add]') || e.target.closest('[data-del]')) return;
+    startFlashcards(decks[Number(el.dataset.idx)][0]);
+  }));
+}
+function deleteSet(name){
+  if(!confirm(`Delete "${name}"?\n\nThis removes the set from your bank. Past attempt history stays in your stats.`)) return;
+  delete state.sets[name];
+  saveState();
+  toast(name + ' deleted.');
+  renderBank();
+  renderHome();
+}
+function deleteDeck(name){
+  if(!confirm(`Delete "${name}"?\n\nThis removes the deck from your bank.`)) return;
+  delete state.decks[name];
+  saveState();
+  toast(name + ' deleted.');
+  renderBank();
+}
+function clearAllData(){
+  if(!confirm('Clear everything?\n\nThis deletes all imported sets, decks, and progress from this device.')) return;
+  state = JSON.parse(JSON.stringify(initialState));
+  saveState();
+  toast('All local data cleared.');
+  navTo('home');
+}
+
+/* ---------- STATS ---------- */
+let expandedSetStats = new Set();
+function renderStats(){
+  flushStudyTime();
+
+  const attemptedQids = new Set(state.attempts.map(a => a.qid));
+  const setsArr = Object.entries(state.sets);
+  const sylEl = document.getElementById('syllabus-chart');
+  if(!setsArr.length){
+    sylEl.innerHTML = '<div class="empty-text">Import a set to see coverage here ✿</div>';
+  } else {
+    sylEl.innerHTML = setsArr.map(([name, qs], i) => {
+      const total = qs.length;
+      const done = qs.filter(q => attemptedQids.has(q.id)).length;
+      const pct = total ? Math.round((done/total)*100) : 0;
+      const expanded = expandedSetStats.has(name);
+      let topicRows = '';
+      if(expanded){
+        const t = {}, d = {};
+        qs.forEach(q => {
+          const tag = q.topic_tag || 'untagged';
+          t[tag] = (t[tag]||0) + 1;
+          if(attemptedQids.has(q.id)) d[tag] = (d[tag]||0) + 1;
+        });
+        topicRows = Object.keys(t).sort((a,b) => ((d[a]||0)/t[a]) - ((d[b]||0)/t[b])).map(tag => {
+          const p = Math.round(((d[tag]||0)/t[tag])*100);
+          return `<div class="chart-row" style="margin-left:16px;">
+            <div class="chart-label" style="width:88px;font-size:11px;">${escHtml(tag)}</div>
+            <div class="chart-track"><div class="chart-fill" style="width:${p}%;background:${p>=70?'var(--mint-deep)':'var(--pink-deep)'};"></div></div>
+            <div class="chart-pct">${p}%</div>
+          </div>`;
+        }).join('');
+      }
+      return `<div class="chart-row" data-set-idx="${i}" style="cursor:pointer;">
+        <div class="chart-label">${escHtml(name)}</div>
+        <div class="chart-track"><div class="chart-fill" style="width:${pct}%;background:${pct>=70?'var(--mint-deep)':'var(--pink-deep)'};"></div></div>
+        <div class="chart-pct">${pct}%</div>
+        <div class="chevron" style="font-size:16px;">${expanded?'▾':'›'}</div>
+      </div>${topicRows}`;
+    }).join('');
+    sylEl.querySelectorAll('[data-set-idx]').forEach(el => {
+      el.addEventListener('click', () => {
+        const name = setsArr[Number(el.dataset.setIdx)][0];
+        if(expandedSetStats.has(name)) expandedSetStats.delete(name); else expandedSetStats.add(name);
+        renderStats();
+      });
+    });
+  }
+
+  const days = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date();
+    d.setDate(d.getDate()-i);
+    days.push(d.toISOString().slice(0,10));
+  }
+  const minutesByDay = days.map(d => state.studyMinutes[d] || 0);
+  const maxMin = Math.max(30, ...minutesByDay);
+  const timeEl = document.getElementById('time-chart');
+  const weekdayLabel = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString(undefined, { weekday:'short' });
+  timeEl.innerHTML = `<div style="display:flex;align-items:flex-end;gap:8px;height:140px;padding-top:10px;">
+    ${days.map((d,i) => {
+      const h = Math.max(3, Math.round((minutesByDay[i]/maxMin)*110));
+      return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;">
+        <div style="font-size:10px;font-weight:800;color:var(--muted);margin-bottom:4px;">${minutesByDay[i] ? Math.round(minutesByDay[i]) : ''}</div>
+        <div style="width:100%;max-width:26px;height:${h}px;border-radius:8px 8px 4px 4px;background:${i===6?'var(--pink-deep)':'var(--mint-deep)'};"></div>
+        <div style="font-size:10px;font-weight:800;color:var(--plum);margin-top:6px;">${weekdayLabel(d)}</div>
+      </div>`;
+    }).join('')}
+  </div>
+  <p class="tiny" style="margin-top:6px;">Total this week: ${Math.round(minutesByDay.reduce((s,m)=>s+m,0))} minutes.</p>`;
+}
+
+/* ---------- cozy generative background music (no files, no network — synthesized) ---------- */
+const MUSIC_PRESETS = {
+  calm:  { label:'Calm pad',    progression:[[130.81,164.81,196.00,246.94],[110.00,130.81,164.81,196.00],[87.31,110.00,130.81,174.61],[98.00,123.47,146.83,174.61]], pluckProb:0.55, filterFreq:850 },
+  lofi:  { label:'Lo-fi pluck', progression:[[220.00,261.63,329.63],[196.00,246.94,293.66],[174.61,220.00,261.63],[164.81,207.65,246.94]], pluckProb:0.8, filterFreq:1200 },
+  bells: { label:'Rain bells',  progression:[[523.25,659.25,783.99],[493.88,587.33,739.99],[440.00,554.37,659.25],[493.88,622.25,739.99]], pluckProb:0.9, filterFreq:2200 },
+  drone: { label:'Focus drone', progression:[[65.41,98.00,130.81],[65.41,98.00,130.81],[73.42,110.00,146.83],[73.42,110.00,146.83]], pluckProb:0.15, filterFreq:500 },
+};
+let audioCtx = null, musicOn = false, musicTimer = null, masterGain = null, longPressFired = false, pressTimer = null;
+function ensureAudioCtx(){
+  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+function playChord(ctx, master, chordIndex){
+  const preset = MUSIC_PRESETS[state.musicSettings.preset] || MUSIC_PRESETS.calm;
+  const notes = preset.progression[chordIndex % preset.progression.length];
+  const now = ctx.currentTime;
+  const chordGain = ctx.createGain();
+  chordGain.gain.value = 0;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'lowpass';
+  filter.frequency.value = preset.filterFreq;
+  filter.connect(chordGain);
+  chordGain.connect(master);
+  notes.forEach(freq => {
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const osc2 = ctx.createOscillator();
+    osc2.type = 'triangle';
+    osc2.frequency.value = freq;
+    osc2.detune.value = 6;
+    const g = ctx.createGain();
+    g.gain.value = 0.45;
+    osc.connect(g); osc2.connect(g); g.connect(filter);
+    osc.start(now); osc2.start(now);
+    osc.stop(now + 4.3); osc2.stop(now + 4.3);
+  });
+  chordGain.gain.linearRampToValueAtTime(0.65, now + 1.3);
+  chordGain.gain.linearRampToValueAtTime(0, now + 4.1);
+
+  if(Math.random() < preset.pluckProb){
+    const pentatonic = [523.25, 587.33, 659.25, 783.99, 880.00, 987.77];
+    const pf = pentatonic[Math.floor(Math.random() * pentatonic.length)];
+    const pOsc = ctx.createOscillator();
+    pOsc.type = 'sine';
+    pOsc.frequency.value = pf;
+    const pGain = ctx.createGain();
+    pGain.gain.value = 0;
+    pOsc.connect(pGain); pGain.connect(master);
+    const pStart = now + 1.4 + Math.random() * 1.4;
+    pGain.gain.setValueAtTime(0.0001, pStart);
+    pGain.gain.linearRampToValueAtTime(0.3, pStart + 0.05);
+    pGain.gain.exponentialRampToValueAtTime(0.001, pStart + 1.7);
+    pOsc.start(pStart); pOsc.stop(pStart + 1.8);
+  }
+}
+function startMusic(){
+  const ctx = ensureAudioCtx();
+  if(ctx.state === 'suspended') ctx.resume();
+  masterGain = ctx.createGain();
+  masterGain.gain.value = 0.0001;
+  masterGain.connect(ctx.destination);
+  masterGain.gain.linearRampToValueAtTime((state.musicSettings.volume/100) * 0.15, ctx.currentTime + 2);
+  let chordIndex = 0;
+  playChord(ctx, masterGain, chordIndex++);
+  musicTimer = setInterval(() => playChord(ctx, masterGain, chordIndex++), state.musicSettings.tempoMs);
+}
+function stopMusic(){
+  if(musicTimer){ clearInterval(musicTimer); musicTimer = null; }
+  if(masterGain && audioCtx){
+    try{ masterGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 1); }catch(e){}
+    setTimeout(() => { try{ masterGain.disconnect(); }catch(e){} }, 1200);
+  }
+}
+function toggleMusic(){
+  musicOn = !musicOn;
+  document.getElementById('music-toggle').textContent = musicOn ? '🔊' : '🎵';
+  if(musicOn) startMusic(); else stopMusic();
+}
+function openMusicSettings(){
+  const wrap = document.getElementById('music-preset-choices');
+  wrap.innerHTML = Object.entries(MUSIC_PRESETS).map(([key,p]) =>
+    `<div class="type-choice ${state.musicSettings.preset===key?'active':''}" data-preset="${key}">${p.label}</div>`).join('');
+  wrap.querySelectorAll('.type-choice').forEach(el => el.addEventListener('click', () => {
+    state.musicSettings.preset = el.dataset.preset;
+    saveState();
+    openMusicSettings();
+    if(musicOn){ stopMusic(); startMusic(); }
+  }));
+  document.getElementById('music-volume').value = state.musicSettings.volume;
+  document.getElementById('music-tempo').value = state.musicSettings.tempoMs;
+  document.getElementById('music-modal').classList.add('active');
+}
+function closeMusicModal(){ document.getElementById('music-modal').classList.remove('active'); }
+document.getElementById('music-volume').addEventListener('input', (e) => {
+  state.musicSettings.volume = Number(e.target.value);
+  saveState();
+  if(musicOn && masterGain && audioCtx){
+    masterGain.gain.linearRampToValueAtTime((state.musicSettings.volume/100) * 0.15, audioCtx.currentTime + 0.3);
+  }
+});
+document.getElementById('music-tempo').addEventListener('input', (e) => {
+  state.musicSettings.tempoMs = Number(e.target.value);
+  saveState();
+  if(musicOn){ stopMusic(); startMusic(); }
+});
+
+const musicBtn = document.getElementById('music-toggle');
+musicBtn.addEventListener('pointerdown', () => {
+  longPressFired = false;
+  pressTimer = setTimeout(() => { longPressFired = true; openMusicSettings(); }, 550);
+});
+['pointerup','pointerleave','pointercancel'].forEach(evt => musicBtn.addEventListener(evt, () => clearTimeout(pressTimer)));
+musicBtn.addEventListener('click', () => {
+  if(longPressFired){ longPressFired = false; return; }
+  toggleMusic();
+});
+
+/* ---------- utils ---------- */
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ---------- init ---------- */
+renderTypeCheckboxes();
+renderHome();
+</script>
+</body>
+</html>
