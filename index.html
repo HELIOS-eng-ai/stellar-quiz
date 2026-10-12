@@ -8,12 +8,13 @@
   :root{
     --cream:#FFF9F2; --white:#FFFDFC; --pink:#F7D6E0; --pink-deep:#EC72B1; --pink-dark:#C94F8C;
     --mint:#CDEEDD; --mint-deep:#91D8BC; --plum:#302A45; --ink:#36323A; --muted:#857987;
-    --gold:#F3C969; --wrong:#F9D7DC; --border:#F0E0E8; --lilac:#EEE8F8;
+    --gold:#F3C969; --wrong:#F9D7DC; --border:#F0E0E8; --lilac:#EEE8F8; --good:#4DBB8A; --bad:#E5667A;
   }
   *{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
-  body{background:var(--cream);color:var(--ink);display:flex;justify-content:center;min-height:100vh;}
-  .app-shell{width:100%;max-width:480px;background:var(--cream);min-height:100vh;display:flex;flex-direction:column;position:relative;padding-bottom:84px;border-left:1px solid var(--border);border-right:1px solid var(--border);}
-  .screen{display:none;padding:16px;flex-direction:column;}
+  html,body{height:100%;}
+  body{background:var(--cream);color:var(--ink);display:flex;justify-content:center;height:100vh;height:100dvh;overflow:hidden;}
+  .app-shell{width:100%;max-width:480px;background:var(--cream);height:100vh;height:100dvh;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;display:flex;flex-direction:column;position:relative;padding-bottom:0;border-left:1px solid var(--border);border-right:1px solid var(--border);}
+  .screen{display:none;padding:16px 16px 100px;flex-direction:column;flex-shrink:0;}
   .screen.active{display:flex;}
   .kicker{font-size:11px;font-weight:800;letter-spacing:1.2px;color:var(--pink-dark);text-transform:uppercase;}
   .hero-title{font-size:27px;font-weight:900;color:var(--plum);margin-top:4px;}
@@ -113,6 +114,29 @@
   @keyframes wobble-soft{0%,100%{transform:rotate(-1.4deg);}50%{transform:rotate(1.4deg);}}
   @keyframes bob{0%,100%{transform:translateY(0);}50%{transform:translateY(-4px);}}
   @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .set-row > div:nth-child(2){flex:1;min-width:0;}
+  .set-name{overflow-wrap:anywhere;}
+  .acc-track{display:flex;width:100%;height:14px;border-radius:8px;overflow:hidden;background:#F1E4EC;}
+  .acc-track.big{height:20px;border-radius:10px;}
+  .acc-good{background:var(--good);height:100%;}
+  .acc-bad{background:var(--bad);height:100%;}
+  .acc-set{margin-top:16px;padding-bottom:4px;}
+  .acc-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .acc-name{flex:1;min-width:0;font-size:13.5px;font-weight:900;color:var(--plum);overflow-wrap:anywhere;}
+  .acc-pct{font-size:14px;font-weight:900;color:var(--plum);}
+  .acc-sub{font-size:11.5px;font-weight:700;color:var(--muted);margin-top:5px;}
+  .acc-sub .g{color:#2f9a6b;} .acc-sub .r{color:#d04e63;}
+  .acc-topic{margin:10px 0 0 14px;padding-left:10px;border-left:3px solid var(--border);}
+  .acc-topic .acc-name{font-size:12px;font-weight:800;}
+  .acc-topic .acc-pct{font-size:12px;}
+  .acc-topic .acc-track{height:10px;}
+  .acc-overall-num{font-size:44px;font-weight:900;color:var(--plum);line-height:1;}
+  .acc-legend{display:flex;gap:14px;margin-top:8px;font-size:12px;font-weight:800;color:var(--muted);}
+  .acc-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;}
+  .edit-row{display:flex;align-items:flex-start;background:var(--white);border:1px solid var(--border);border-radius:16px;padding:12px;margin-top:10px;}
+  .edit-row .preview-q{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .del-btn{margin-left:10px;padding:6px 10px;border-radius:12px;border:1.5px solid #c94f4f;color:#c94f4f;background:transparent;font-size:14px;cursor:pointer;flex-shrink:0;}
+  .del-btn:active{background:#FDECEE;}
   #screen-quiz .card{margin-top:14px;}
   #flash-card{transition:box-shadow .15s ease;}
   #flash-card:active{box-shadow:0 2px 6px rgba(48,42,69,.08);}
@@ -153,7 +177,7 @@
     </div>
 
     <div class="divider"></div>
-    <div class="kicker" style="color:var(--plum);margin-bottom:6px;">YOUR QUESTION SETS <span class="deco" style="font-size:13px;animation-delay:1.1s;">🌼</span></div>
+    <div class="kicker" style="color:var(--plum);margin-bottom:6px;">RECENTLY OPENED OR SOLVED <span class="deco" style="font-size:13px;animation-delay:1.1s;">🌼</span></div>
     <div id="home-set-list"></div>
     <button class="btn btn-ghost" style="margin-top:14px;" onclick="startQuizImportFresh()">＋ Import more study material</button>
   </section>
@@ -170,10 +194,10 @@
 
     <div class="card">
       <div class="card-title">2. Give an AI your raw notes</div>
-      <p class="help">Copy the conversion prompt, paste it into ChatGPT / Claude / Gemini, then paste your raw questions underneath it in that chat. The prompt asks the AI to keep its answer under 20,000 characters so it pastes cleanly back into Android.</p>
+      <p class="help">Tap Open in ChatGPT to start a chat with the prompt already loaded (it's also copied to your clipboard as a backup), then paste your raw notes into that chat. Prefer Claude or Gemini? Use Copy prompt instead. The prompt keeps the answer under 20,000 characters so it pastes back into Android cleanly.</p>
       <div class="btn-row">
         <button class="btn btn-ghost" id="copy-prompt-btn">Copy prompt</button>
-        <button class="btn btn-mint" id="share-prompt-btn">Share</button>
+        <button class="btn btn-mint" id="share-prompt-btn">Open in ChatGPT ↗</button>
       </div>
       <button class="btn btn-ghost" style="margin-top:8px;" id="raw-prompt-toggle">Show prompt text (manual copy)</button>
       <textarea id="raw-prompt-box" readonly style="display:none;min-height:160px;font-size:12px;"></textarea>
@@ -296,7 +320,7 @@
       <p class="help">This prompt asks the AI to apply the 80/20 rule — flagging the high-yield concepts worth mastering first — and turn everything into flashcards. It also keeps output under 20,000 characters for Android pasting.</p>
       <div class="btn-row">
         <button class="btn btn-ghost" id="copy-study-prompt-btn">Copy prompt</button>
-        <button class="btn btn-mint" id="share-study-prompt-btn">Share</button>
+        <button class="btn btn-mint" id="share-study-prompt-btn">Open in ChatGPT ↗</button>
       </div>
       <button class="btn btn-ghost" style="margin-top:8px;" id="raw-study-prompt-toggle">Show prompt text (manual copy)</button>
       <textarea id="raw-study-prompt-box" readonly style="display:none;min-height:160px;font-size:12px;"></textarea>
@@ -354,18 +378,35 @@
     </div>
     <div id="bank-quiz-panel"></div>
     <div id="bank-study-panel" style="display:none;"></div>
-    <div class="divider"></div>
-    <button class="btn btn-ghost" style="color:#c94f4f;border-color:#c94f4f;" onclick="clearAllData()">Clear all stored data</button>
     <div style="height:20px"></div>
+  </section>
+
+  <!-- EDIT SET / DECK (remove items) -->
+  <section id="screen-edit-set" class="screen">
+    <div class="top-row"><button class="icon-btn" onclick="navTo('bank')">‹ Back</button><span class="kicker" id="edit-set-kicker">EDIT SET</span></div>
+    <h2 class="hero-title" style="font-size:21px;margin-top:12px;" id="edit-set-title"></h2>
+    <p class="help" id="edit-set-help" style="margin-top:4px;">Tap 🗑 to remove anything you don't want in this set.</p>
+    <div id="edit-set-list"></div>
   </section>
 
   <!-- STATS -->
   <section id="screen-stats" class="screen">
     <div class="hero-header"><div><div class="kicker">YOUR PROGRESS ✦</div><h1 class="hero-title" style="font-size:23px;">Analysis</h1></div></div>
     <div class="card">
-      <div class="card-title">Syllabus covered</div>
-      <p class="help">Percentage covered per set — tap a set to see its topic breakdown.</p>
-      <div id="syllabus-chart"></div>
+      <div class="card-title">Accuracy</div>
+      <p class="help">How much you're getting right. Green is correct, red is wrong.</p>
+      <div id="accuracy-overall" style="margin-top:12px;"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Accuracy by set</div>
+      <p class="help">Tap a set to see its topics, weakest first.</p>
+      <div id="accuracy-chart"></div>
+      <p class="tiny">Written and matching answers count as correct at 70% or more.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Needs attention</div>
+      <p class="help">Your weakest topics across all sets (at least 2 attempts).</p>
+      <div id="weak-topics"></div>
     </div>
     <div class="card">
       <div class="card-title">Time studied</div>
@@ -481,7 +522,7 @@
 /* ---------- storage ---------- */
 const STORAGE_KEY = 'stellars_quiz_time_web_v2';
 const initialState = {
-  sets:{}, decks:{}, attempts:[], activity:[], studyMinutes:{}, cardProgress:{},
+  sets:{}, decks:{}, attempts:[], activity:[], studyMinutes:{}, cardProgress:{}, setMeta:{},
   musicSettings: { preset:'calm', volume:45, tempoMs:4300 },
 };
 let state = loadState();
@@ -559,9 +600,17 @@ function renderTypeCheckboxes(){
 function buildConversionPrompt(){
   const chosen = TYPE_DEFS.filter(t => selectedTypes.has(t.key));
   const schemaBlock = chosen.map(t => `${t.label}:\n${TYPE_SCHEMAS[t.key]}`).join('\n\n');
-  return `You are converting raw test material into a strict JSON array for Stellar's Quiz Time, a personal study app. Below this instruction I will paste raw questions and answers, possibly messy or informally formatted.
+  return `You are a college examiner setting a BSc-level exam paper. Below this instruction I will paste my raw study material (notes, textbook text, or existing questions and answers). Turn it into a strict JSON array of exam-style questions for Stellar's Quiz Time, a personal study app.
 
-Only produce these question types: ${chosen.map(t => t.label).join(', ')}. If part of the material doesn't cleanly fit any of these, pick the closest fit among them, or leave that item out entirely rather than inventing a type that isn't listed.
+EXAMINER MINDSET:
+- Think like a college examiner. Pick the most high-yield content: the concepts, definitions, mechanisms, classifications, differences, functions and examples that are very likely to be asked in a real university exam.
+- Keep the difficulty at standard college BSc level. Do not ask anything advanced, postgraduate-level, research-level or deliberately tricky.
+- STAY STRICTLY INSIDE THE RAW MATERIAL. Every question, and its correct answer, must be answerable directly from the text I paste. Never use outside knowledge, never add facts that are not in the material, and never ask about a topic the material does not cover. If you are not sure whether something is covered, leave it out.
+- Prioritise important, examinable topics first. Skip trivia, minor side details and anything an examiner would be unlikely to ask.
+- If the material already contains questions, convert them faithfully instead of inventing new ones.
+- For MCQs, make the three wrong options plausible BSc-level distractors (related terms from the material), with exactly one clearly correct answer.
+
+Only produce these question types: ${chosen.map(t => t.label).join(', ')}. If part of the material doesn't cleanly fit any of these, pick the closest fit among them, or leave that item out rather than inventing a type that isn't listed.
 
 Use exactly one of these object shapes depending on type:
 
@@ -570,14 +619,14 @@ ${schemaBlock}
 Shared rules:
 1. "id" must be a short unique string per question.
 2. "hint" should nudge without giving the answer away.
-3. "topic_tag" is a short topic/chapter/concept label.
+3. "topic_tag" is a short topic/chapter/concept label. Reuse the exact same label for questions on the same topic, because the app groups statistics by it.
 4. Preserve the source material's terminology — do not invent facts.
-5. For subjective questions, choose marks of 2, 5, or 10 (default 5 if unclear) and write a full model answer.
+5. For subjective questions, choose marks of 2, 5, or 10 (default 5 if unclear) and write a full model answer using only points from the material.
 6. For match_following, keep every pair unambiguous — no two "right" values should be identical.
 
-IMPORTANT — LENGTH LIMIT: Your entire JSON output must stay under 20,000 characters total. This is the practical ceiling for pasting text into most Android apps. If the source material would produce more, include fewer complete questions rather than cutting one short — never truncate a JSON object mid-way.
+IMPORTANT — LENGTH LIMIT: Your entire JSON output must stay under 20,000 characters total. This is the practical ceiling for pasting text into most Android apps. If the source material would produce more, include fewer complete questions (the highest-yield ones) rather than cutting one short — never truncate a JSON object mid-way.
 
-Return ONLY the raw JSON array. No prose, no markdown fences.
+Return ONLY the raw JSON array. No prose, no markdown fences. (One exception: if no raw material has been pasted below yet, reply only with "Ready - send your material" and wait for my next message.)
 
 Raw material follows:`;
 }
@@ -594,7 +643,7 @@ Convert the material into a JSON array of flashcard objects shaped exactly like 
 Rules:
 1. List all "high" priority cards first in the array, then "normal" ones after.
 2. Keep "front" short enough to read at a glance; keep "back" complete but concise — a few sentences at most.
-3. Don't invent facts not supported by the material.
+3. Stay strictly inside the material at college BSc level — don't invent facts or add advanced content that isn't in it.
 4. Prefer more, smaller cards over few dense ones — each card should test one idea.
 
 IMPORTANT — LENGTH LIMIT: Your entire JSON output must stay under 20,000 characters total, the practical ceiling for pasting into most Android apps. If the material would produce more, keep every high-priority card and trim normal-priority ones rather than cutting a card short.
@@ -671,6 +720,7 @@ function navTo(target){
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   const el = document.getElementById('screen-' + target);
   if(el) el.classList.add('active');
+  const shell = document.querySelector('.app-shell'); if(shell) shell.scrollTop = 0;
   const navMap = { home:'nav-btn-home', study:'nav-btn-study', bank:'nav-btn-bank', stats:'nav-btn-stats' };
   if(navMap[target]) document.getElementById(navMap[target]).classList.add('active');
   const bottomNav = document.getElementById('bottom-nav');
@@ -679,6 +729,7 @@ function navTo(target){
   if(target === 'study') renderStudy();
   if(target === 'bank') renderBank();
   if(target === 'stats') renderStats();
+  if(target === 'edit-set') renderEditSet();
 }
 
 function toast(msg){
@@ -731,8 +782,18 @@ async function shareText(text){
   }
   copyText(text, 'Sharing not supported here — copied instead ✿');
 }
+function openInChatGPT(text){
+  copyText(text, 'Prompt copied — opening ChatGPT ✿');
+  const a = document.createElement('a');
+  a.href = 'https://chatgpt.com/?q=' + encodeURIComponent(text);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
 document.getElementById('copy-prompt-btn').addEventListener('click', () => copyText(buildConversionPrompt(), 'Prompt copied ✿'));
-document.getElementById('share-prompt-btn').addEventListener('click', () => shareText(buildConversionPrompt()));
+document.getElementById('share-prompt-btn').addEventListener('click', () => openInChatGPT(buildConversionPrompt()));
 document.getElementById('modal-copy-btn').addEventListener('click', () => copyText(document.getElementById('modal-grading-prompt').value, 'Prompt copied ✿'));
 document.getElementById('modal-share-btn').addEventListener('click', () => shareText(document.getElementById('modal-grading-prompt').value));
 document.getElementById('raw-prompt-toggle').addEventListener('click', () => {
@@ -744,7 +805,7 @@ document.getElementById('raw-prompt-toggle').addEventListener('click', () => {
   if(show){ box.value = buildConversionPrompt(); box.focus(); box.select(); }
 });
 document.getElementById('copy-study-prompt-btn').addEventListener('click', () => copyText(buildStudyConversionPrompt(), 'Prompt copied ✿'));
-document.getElementById('share-study-prompt-btn').addEventListener('click', () => shareText(buildStudyConversionPrompt()));
+document.getElementById('share-study-prompt-btn').addEventListener('click', () => openInChatGPT(buildStudyConversionPrompt()));
 document.getElementById('raw-study-prompt-toggle').addEventListener('click', () => {
   const box = document.getElementById('raw-study-prompt-box');
   const btn = document.getElementById('raw-study-prompt-toggle');
@@ -755,8 +816,15 @@ document.getElementById('raw-study-prompt-toggle').addEventListener('click', () 
 });
 
 /* ---------- HOME ---------- */
+function setsByRecent(){
+  const meta = state.setMeta || {};
+  const all = Object.entries(state.sets);
+  const opened = all.filter(([n]) => meta[n]).sort((x, y) => meta[y[0]] - meta[x[0]]);
+  const unopened = all.filter(([n]) => !meta[n]).reverse();
+  return [...opened, ...unopened];
+}
 function renderHome(){
-  const sets = Object.entries(state.sets);
+  const sets = setsByRecent();
   const totalQuestions = sets.reduce((n,[,qs]) => n + qs.length, 0);
   const attempted = state.attempts.length;
   const mastery = attempted ? Math.round((state.attempts.filter(a => a.correct === true || (a.estimatedMax && a.estimatedEarned/a.estimatedMax >= 0.7)).length / attempted) * 100) : 0;
@@ -787,7 +855,7 @@ function renderHome(){
         <div><div class="set-name">${escHtml(name)}</div><div class="set-meta">${qs.length} questions · ${escHtml(topics)}</div></div>
         <div class="chevron">›</div>
       </div>`;
-    }).join('');
+    }).join('') + (sets.length > 6 ? `<button class="btn btn-ghost" style="margin-top:10px;" onclick="navTo('bank')">See all ${sets.length} sets in Bank →</button>` : '');
     listEl.querySelectorAll('.set-row').forEach(el => {
       el.addEventListener('click', () => startSet(sets[Number(el.dataset.idx)][0]));
     });
@@ -958,6 +1026,8 @@ function currentQuestion(){ return sessionQuestions[quizIndex]; }
 function startSet(name){
   const bank = state.sets[name] || [];
   currentSet = name;
+  state.setMeta = state.setMeta || {};
+  state.setMeta[name] = Date.now();
   sessionQuestions = shuffle(bank).map(q => q.type === 'mcq' ? { ...q, options: shuffle(q.options) } : { ...q });
   sessionResults = new Array(sessionQuestions.length).fill(null);
   quizIndex = 0;
@@ -1506,8 +1576,8 @@ function renderBankQuizPanel(){
     <div class="set-icon">▱</div>
     <div style="flex:1;"><div class="set-name">${escHtml(name)}</div><div class="set-meta">${qs.length} questions</div></div>
     <button class="icon-btn" data-add="${i}" style="margin-right:6px;">＋</button>
-    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;">🗑</button>
-    <div class="chevron">›</div>
+    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;margin-right:6px;">🗑</button>
+    <button class="icon-btn" data-edit="${i}" title="Edit" style="padding:4px 11px;font-size:20px;line-height:1.2;">›</button>
   </div>`).join('');
   list.querySelectorAll('[data-add]').forEach(btn => btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1518,12 +1588,16 @@ function renderBankQuizPanel(){
     document.getElementById('import-json-title').textContent = `Add to "${name}"`;
     navTo('import');
   }));
+  list.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openSetEditor('set', sets[Number(btn.dataset.edit)][0]);
+  }));
   list.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', (e) => {
     e.stopPropagation();
     deleteSet(sets[Number(btn.dataset.del)][0]);
   }));
   list.querySelectorAll('.set-row').forEach(el => el.addEventListener('click', (e) => {
-    if(e.target.closest('[data-add]') || e.target.closest('[data-del]')) return;
+    if(e.target.closest('[data-add]') || e.target.closest('[data-del]') || e.target.closest('[data-edit]')) return;
     startSet(sets[Number(el.dataset.idx)][0]);
   }));
 }
@@ -1538,8 +1612,8 @@ function renderBankStudyPanel(){
     <div class="set-icon">◆</div>
     <div style="flex:1;"><div class="set-name">${escHtml(name)}</div><div class="set-meta">${cards.length} cards</div></div>
     <button class="icon-btn" data-add="${i}" style="margin-right:6px;">＋</button>
-    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;">🗑</button>
-    <div class="chevron">›</div>
+    <button class="icon-btn" data-del="${i}" style="border-color:#c94f4f;color:#c94f4f;margin-right:6px;">🗑</button>
+    <button class="icon-btn" data-edit="${i}" title="Edit" style="padding:4px 11px;font-size:20px;line-height:1.2;">›</button>
   </div>`).join('');
   list.querySelectorAll('[data-add]').forEach(btn => btn.addEventListener('click', (e) => {
     e.stopPropagation();
@@ -1550,18 +1624,23 @@ function renderBankStudyPanel(){
     document.getElementById('study-import-json-title').textContent = `Add to "${name}"`;
     navTo('study-import');
   }));
+  list.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    openSetEditor('deck', decks[Number(btn.dataset.edit)][0]);
+  }));
   list.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', (e) => {
     e.stopPropagation();
     deleteDeck(decks[Number(btn.dataset.del)][0]);
   }));
   list.querySelectorAll('.set-row').forEach(el => el.addEventListener('click', (e) => {
-    if(e.target.closest('[data-add]') || e.target.closest('[data-del]')) return;
+    if(e.target.closest('[data-add]') || e.target.closest('[data-del]') || e.target.closest('[data-edit]')) return;
     startFlashcards(decks[Number(el.dataset.idx)][0]);
   }));
 }
 function deleteSet(name){
   if(!confirm(`Delete "${name}"?\n\nThis removes the set from your bank. Past attempt history stays in your stats.`)) return;
   delete state.sets[name];
+  if(state.setMeta) delete state.setMeta[name];
   saveState();
   toast(name + ' deleted.');
   renderBank();
@@ -1574,12 +1653,56 @@ function deleteDeck(name){
   toast(name + ' deleted.');
   renderBank();
 }
-function clearAllData(){
-  if(!confirm('Clear everything?\n\nThis deletes all imported sets, decks, and progress from this device.')) return;
-  state = JSON.parse(JSON.stringify(initialState));
+/* ---------- EDIT SET / DECK ---------- */
+let editSetKind = 'set', editSetName = null;
+function openSetEditor(kind, name){
+  editSetKind = kind; editSetName = name;
+  navTo('edit-set');
+}
+function editSetItems(){
+  return (editSetKind === 'deck' ? state.decks : state.sets)[editSetName];
+}
+function renderEditSet(){
+  const items = editSetItems();
+  if(!items){ navTo('bank'); return; }
+  const isDeck = editSetKind === 'deck';
+  document.getElementById('edit-set-kicker').textContent = isDeck ? 'EDIT DECK' : 'EDIT SET';
+  document.getElementById('edit-set-title').textContent = editSetName;
+  document.getElementById('edit-set-help').textContent = items.length + (isDeck ? ' card' : ' question') + (items.length === 1 ? '' : 's') + ' · tap 🗑 to remove any you don\'t want.';
+  document.getElementById('edit-set-list').innerHTML = items.map((item, i) => {
+    const pills = isDeck
+      ? [item.priority === 'high' ? '<span class="pill">high-yield</span>' : '', item.topic_tag ? `<span class="pill">${escHtml(item.topic_tag)}</span>` : ''].join('')
+      : [`<span class="pill">${escHtml(typeLabel(item.type))}</span>`, item.marks ? `<span class="pill">${item.marks} marks</span>` : '', item.topic_tag ? `<span class="pill">${escHtml(item.topic_tag)}</span>` : ''].join('');
+    const text = isDeck ? item.front : item.question_text;
+    return `<div class="edit-row">
+      <div class="preview-num">${i+1}</div>
+      <div class="preview-q">${escHtml(text || '(empty)')}<div style="margin-top:6px;">${pills}</div></div>
+      <button class="del-btn" data-rm="${i}" title="Remove">🗑</button>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('#edit-set-list [data-rm]').forEach(btn => btn.addEventListener('click', () => removeFromSet(Number(btn.dataset.rm))));
+}
+function removeFromSet(idx){
+  const isDeck = editSetKind === 'deck';
+  const store = isDeck ? state.decks : state.sets;
+  const items = store[editSetName];
+  if(!items || !items[idx]) return;
+  const noun = isDeck ? 'card' : 'question';
+  if(items.length === 1){
+    if(!confirm(`This is the last ${noun} — removing it deletes "${editSetName}" completely. Continue?`)) return;
+    delete store[editSetName];
+    if(!isDeck && state.setMeta) delete state.setMeta[editSetName];
+    saveState();
+    toast(editSetName + ' deleted.');
+    navTo('bank');
+    return;
+  }
+  if(!confirm(`Remove this ${noun}?`)) return;
+  const removed = items.splice(idx, 1)[0];
+  if(isDeck && removed && state.cardProgress) delete state.cardProgress[removed.id];
   saveState();
-  toast('All local data cleared.');
-  navTo('home');
+  toast('Removed ✿');
+  renderEditSet();
 }
 
 /* ---------- STATS ---------- */
@@ -1587,42 +1710,51 @@ let expandedSetStats = new Set();
 function renderStats(){
   flushStudyTime();
 
-  const attemptedQids = new Set(state.attempts.map(a => a.qid));
+  const isRight = (a) => a.correct === true || (!!a.estimatedMax && a.estimatedEarned / a.estimatedMax >= 0.7);
+  const tally = (list) => { let c = 0, w = 0; list.forEach(a => isRight(a) ? c++ : w++); return { c, w, t: c + w, pct: (c + w) ? Math.round(c / (c + w) * 100) : null }; };
+  const bar = (r, big) => r.t
+    ? `<div class="acc-track${big ? ' big' : ''}"><div class="acc-good" style="width:${r.c / r.t * 100}%"></div><div class="acc-bad" style="width:${r.w / r.t * 100}%"></div></div>`
+    : `<div class="acc-track${big ? ' big' : ''}"></div>`;
+
+  // overall
+  const overall = tally(state.attempts);
+  document.getElementById('accuracy-overall').innerHTML = overall.t
+    ? `<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px;"><div class="acc-overall-num">${overall.pct}%</div><div class="help">correct overall · ${overall.t} answers</div></div>
+       ${bar(overall, true)}
+       <div class="acc-legend"><span><span class="acc-dot" style="background:var(--good);"></span>${overall.c} correct</span><span><span class="acc-dot" style="background:var(--bad);"></span>${overall.w} wrong</span></div>`
+    : '<div class="empty-text">Solve a few questions to see your accuracy ✿</div>';
+
+  // per set
   const setsArr = Object.entries(state.sets);
-  const sylEl = document.getElementById('syllabus-chart');
+  const accEl = document.getElementById('accuracy-chart');
   if(!setsArr.length){
-    sylEl.innerHTML = '<div class="empty-text">Import a set to see coverage here ✿</div>';
+    accEl.innerHTML = '<div class="empty-text">Import a set to see accuracy here ✿</div>';
   } else {
-    sylEl.innerHTML = setsArr.map(([name, qs], i) => {
-      const total = qs.length;
-      const done = qs.filter(q => attemptedQids.has(q.id)).length;
-      const pct = total ? Math.round((done/total)*100) : 0;
+    accEl.innerHTML = setsArr.map(([name, qs], i) => {
+      const atts = state.attempts.filter(a => a.set === name);
+      const r = tally(atts);
+      const tried = new Set(atts.map(a => a.qid)).size;
       const expanded = expandedSetStats.has(name);
       let topicRows = '';
       if(expanded){
-        const t = {}, d = {};
-        qs.forEach(q => {
-          const tag = q.topic_tag || 'untagged';
-          t[tag] = (t[tag]||0) + 1;
-          if(attemptedQids.has(q.id)) d[tag] = (d[tag]||0) + 1;
-        });
-        topicRows = Object.keys(t).sort((a,b) => ((d[a]||0)/t[a]) - ((d[b]||0)/t[b])).map(tag => {
-          const p = Math.round(((d[tag]||0)/t[tag])*100);
-          return `<div class="chart-row" style="margin-left:16px;">
-            <div class="chart-label" style="width:88px;font-size:11px;">${escHtml(tag)}</div>
-            <div class="chart-track"><div class="chart-fill" style="width:${p}%;background:${p>=70?'var(--mint-deep)':'var(--pink-deep)'};"></div></div>
-            <div class="chart-pct">${p}%</div>
-          </div>`;
-        }).join('');
+        const byTopic = {};
+        atts.forEach(a => { const tag = a.topic || 'untagged'; (byTopic[tag] = byTopic[tag] || []).push(a); });
+        const rows = Object.entries(byTopic).map(([tag, list]) => ({ tag, r: tally(list) })).sort((x, y) => x.r.pct - y.r.pct);
+        topicRows = rows.length
+          ? rows.map(({ tag, r: tr }) => `<div class="acc-topic">
+              <div class="acc-head"><span class="acc-name">${escHtml(tag)}</span><span class="acc-pct">${tr.pct}%</span></div>
+              ${bar(tr)}
+              <div class="acc-sub"><span class="g">${tr.c} correct</span> · <span class="r">${tr.w} wrong</span></div>
+            </div>`).join('')
+          : '<div class="acc-topic"><div class="acc-sub">No attempts yet in this set.</div></div>';
       }
-      return `<div class="chart-row" data-set-idx="${i}" style="cursor:pointer;">
-        <div class="chart-label">${escHtml(name)}</div>
-        <div class="chart-track"><div class="chart-fill" style="width:${pct}%;background:${pct>=70?'var(--mint-deep)':'var(--pink-deep)'};"></div></div>
-        <div class="chart-pct">${pct}%</div>
-        <div class="chevron" style="font-size:16px;">${expanded?'▾':'›'}</div>
+      return `<div class="acc-set" data-set-idx="${i}" style="cursor:pointer;">
+        <div class="acc-head"><span class="acc-name">${escHtml(name)}</span><span class="acc-pct">${r.t ? r.pct + '%' : '—'}</span><span class="chevron" style="font-size:18px;margin:0;">${expanded ? '▾' : '›'}</span></div>
+        ${bar(r)}
+        <div class="acc-sub">${r.t ? `<span class="g">${r.c} correct</span> · <span class="r">${r.w} wrong</span> · ` : 'Not attempted yet · '}${tried}/${qs.length} questions tried</div>
       </div>${topicRows}`;
     }).join('');
-    sylEl.querySelectorAll('[data-set-idx]').forEach(el => {
+    accEl.querySelectorAll('[data-set-idx]').forEach(el => {
       el.addEventListener('click', () => {
         const name = setsArr[Number(el.dataset.setIdx)][0];
         if(expandedSetStats.has(name)) expandedSetStats.delete(name); else expandedSetStats.add(name);
@@ -1630,6 +1762,22 @@ function renderStats(){
       });
     });
   }
+
+  // weakest topics across everything
+  const topicMap = {};
+  state.attempts.forEach(a => {
+    if(!state.sets[a.set]) return;
+    const key = (a.topic || 'untagged') + '||' + a.set;
+    (topicMap[key] = topicMap[key] || { tag: a.topic || 'untagged', set: a.set, list: [] }).list.push(a);
+  });
+  const weak = Object.values(topicMap).map(o => ({ ...o, r: tally(o.list) })).filter(o => o.r.t >= 2 && o.r.pct < 100)
+    .sort((x, y) => x.r.pct - y.r.pct).slice(0, 5);
+  document.getElementById('weak-topics').innerHTML = weak.length
+    ? weak.map(o => `<div class="acc-set" style="margin-top:12px;">
+        <div class="acc-head"><span class="acc-name">${escHtml(o.tag)} <span style="font-weight:700;color:var(--muted);font-size:11px;">· ${escHtml(o.set)}</span></span><span class="acc-pct">${o.r.pct}%</span></div>
+        ${bar(o.r)}
+      </div>`).join('')
+    : '<div class="empty-text">Nothing to flag yet — keep practising ✿</div>';
 
   const days = [];
   for(let i=6;i>=0;i--){
